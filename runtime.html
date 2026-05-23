@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Runtime Decision — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Runtime Decision</h1>
+  <p class="subtitle">V8 vs Chromium vs WebKit vs Servo vs Canvas -- how do web apps actually run?</p>
+
+  <h2>The Question</h2>
+  <p>If web apps are the only app format, what engine runs them? "A WebView" is not a complete answer. The runtime choice affects performance, capability, size, and what AI can generate.</p>
+
+  <h2>What V8 Actually Is</h2>
+  <p>V8 is Google's JavaScript engine. It compiles JS to native machine code. It's fast and well-maintained. But <strong>V8 alone cannot render HTML or CSS.</strong> It executes JavaScript, nothing more. To display a web page, you also need:</p>
+  <ul>
+    <li>An HTML parser</li>
+    <li>A CSS layout engine</li>
+    <li>A rendering/painting engine</li>
+    <li>A DOM implementation</li>
+    <li>Networking, media playback, etc.</li>
+  </ul>
+  <p>V8 is the engine. Chromium is the car.</p>
+
+  <h2>Options Evaluated</h2>
+
+  <table>
+    <tr><th>Runtime</th><th>What it is</th><th>Pro</th><th>Con</th></tr>
+    <tr>
+      <td><strong>Chromium Content Shell</strong></td>
+      <td>V8 + Blink renderer. Chromium stripped to its rendering core. No browser UI.</td>
+      <td>Most capable web engine. Full WebGPU. Best web API coverage. AI generates standard HTML/CSS/JS.</td>
+      <td>Large (~150MB). Comes from Google. Complex codebase.</td>
+    </tr>
+    <tr>
+      <td><strong>Android System WebView</strong></td>
+      <td>AOSP's built-in Chromium wrapper. Updated via system.</td>
+      <td>Already in AOSP. Well-maintained. Standard.</td>
+      <td>Designed for embedding in apps, not as an OS runtime. Limited customization.</td>
+    </tr>
+    <tr>
+      <td><strong>WebKit</strong></td>
+      <td>Safari's engine. Apple-maintained.</td>
+      <td>Lighter than Chromium. Battle-tested.</td>
+      <td>WebGPU lagging. Fewer web APIs than Chromium. Apple-controlled priorities.</td>
+    </tr>
+    <tr>
+      <td><strong>Servo</strong></td>
+      <td>Mozilla/Linux Foundation experimental engine. Written in Rust.</td>
+      <td>Modern, memory-safe, parallel rendering. Lighter.</td>
+      <td>Not production-ready. Incomplete web API coverage. Small team.</td>
+    </tr>
+    <tr>
+      <td><strong>V8 + custom renderer</strong></td>
+      <td>V8 for JS, build our own layout/rendering engine.</td>
+      <td>Maximum control. Could optimize for AI-generated apps.</td>
+      <td>Building a rendering engine is a multi-year, multi-team project. Browsers are among the most complex software ever built.</td>
+    </tr>
+    <tr>
+      <td><strong>V8 + Canvas/Skia</strong></td>
+      <td>Skip HTML/CSS. Render everything to a GPU canvas (like Flutter).</td>
+      <td>High performance. Direct GPU access.</td>
+      <td>AI is much worse at generating canvas-based UIs than HTML/CSS. Kills the core advantage of web tech.</td>
+    </tr>
+  </table>
+
+  <h2>Why Chromium Content Shell Wins</h2>
+  <ol>
+    <li><strong>AI generates HTML/CSS/JS.</strong> That's what LLMs are best at. Any runtime that doesn't render standard HTML kills the app generation thesis.</li>
+    <li><strong>WebGPU.</strong> On-device AI inference through the web runtime. Chromium has the best WebGPU support.</li>
+    <li><strong>Web API coverage.</strong> Service Workers (offline), IndexedDB, Canvas, WebGL, MediaDevices, Intersection Observer -- Chromium supports more web APIs than any other engine.</li>
+    <li><strong>Already in AOSP.</strong> System WebView is Chromium-based. We don't need to add a new engine -- we strip the existing one to its core.</li>
+  </ol>
+
+  <h2>What We Strip from Chromium</h2>
+  <table>
+    <tr><th>Removed</th><th>Reason</th></tr>
+    <tr><td>Browser UI (tabs, address bar, bookmarks)</td><td>Not a browser. Apps are loaded by the OS, not navigated to.</td></tr>
+    <tr><td>Extension system</td><td>No extensions. Apps are TWAs.</td></tr>
+    <tr><td>Sync / Google account</td><td>No Google dependency.</td></tr>
+    <tr><td>Autofill, password manager</td><td>OS handles identity, not the browser engine.</td></tr>
+    <tr><td>Download manager</td><td>OS handles files through the Capability Broker.</td></tr>
+    <tr><td>Print, translate, reading mode</td><td>Not needed. Can be added as TWAs if wanted.</td></tr>
+  </table>
+
+  <h2>What We Keep</h2>
+  <table>
+    <tr><th>Kept</th><th>Why</th></tr>
+    <tr><td>V8 (JavaScript engine)</td><td>Runs app code</td></tr>
+    <tr><td>Blink (rendering engine)</td><td>Renders HTML/CSS</td></tr>
+    <tr><td>Skia (graphics)</td><td>GPU-accelerated drawing</td></tr>
+    <tr><td>WebGPU</td><td>On-device AI inference, GPU compute</td></tr>
+    <tr><td>Service Workers</td><td>Offline app operation</td></tr>
+    <tr><td>MediaDevices API</td><td>Camera/mic access (supplemented by Capability Broker)</td></tr>
+    <tr><td>Canvas / WebGL</td><td>Games, charts, graphics</td></tr>
+  </table>
+
+  <h2>The "No Frameworks" Principle</h2>
+  <p>The OS itself is built with <strong>zero JavaScript frameworks</strong>. No React. No Vue. No Angular. No Capacitor. No Ionic. No Electron.</p>
+  <ul>
+    <li>System UI: plain HTML + vanilla JS + CSS</li>
+    <li>Generated apps: plain HTML + vanilla JS + CSS</li>
+    <li>Capability Broker bridge: plain Java talking to plain JS via WebView interface</li>
+  </ul>
+  <p>Frameworks add layers. Layers add latency, bugs, dependencies, and upgrade treadmills. The AI generates plain web code. The OS runs plain web code. No middlemen.</p>
+
+  <div class="page-nav">
+    <a href="why-linux.html">&larr; Why Linux</a>
+    <a href="twa.html">Trusted Web Apps &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

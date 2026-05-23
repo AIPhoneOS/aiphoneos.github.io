@@ -2,8 +2,15 @@
 const NAV = [
   { section: 'Overview', items: [
     { title: 'Vision & Thesis', href: 'index.html' },
+    { title: 'Founding Story', href: 'founding-story.html' },
     { title: 'System Architecture', href: 'stack.html' },
     { title: 'vs iOS / Android', href: 'comparison.html' },
+  ]},
+  { section: 'Key Decisions', items: [
+    { title: 'Why Linux Kernel', href: 'why-linux.html' },
+    { title: 'Runtime (V8/Chromium)', href: 'runtime.html' },
+    { title: 'Why No Native Apps', href: 'no-native-apps.html' },
+    { title: 'OS Foundation', href: 'foundation.html' },
   ]},
   { section: 'App Platform', items: [
     { title: 'Trusted Web Apps', href: 'twa.html' },
@@ -25,9 +32,8 @@ const NAV = [
   ]},
   { section: 'Engineering', items: [
     { title: 'OS Build Paths', href: 'os-paths.html' },
-    { title: 'OS Foundation', href: 'foundation.html' },
-    { title: 'Decisions', href: 'decisions.html' },
-    { title: 'Build Path', href: 'buildpath.html' },
+    { title: 'All Decisions', href: 'decisions.html' },
+    { title: 'Build Phases', href: 'buildpath.html' },
     { title: 'Research', href: 'research.html' },
   ]},
 ];
@@ -37,7 +43,7 @@ function initNav() {
   const sidebar = document.querySelector('.sidebar');
   if (!sidebar) return;
 
-  let html = `<div class="logo"><h1>AIPhone OS</h1><p>Knowledge Base v0.3</p><div class="wn">* working name — requires trademark clearance</div></div>`;
+  let html = `<div class="logo"><h1>AIPhone OS</h1><p>Knowledge Base v0.4</p><div class="wn">* working name — requires trademark clearance</div></div>`;
 
   NAV.forEach(section => {
     html += `<div class="nav-section"><div class="nav-section-title">${section.section}</div>`;

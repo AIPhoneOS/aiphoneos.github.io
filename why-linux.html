@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Why Linux Kernel — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Why Linux Kernel</h1>
+  <p class="subtitle">Not because it's the best. Because it's the only one with phone hardware drivers.</p>
+
+  <h2>The Question</h2>
+  <p>If we're building a new OS from scratch, should we start with the best kernel for the job? Could a microkernel be more secure? Could something custom be lighter?</p>
+
+  <h2>The Answer</h2>
+  <p><strong>Linux is the only kernel that can talk to phone hardware.</strong> Every phone chipset vendor (Qualcomm, MediaTek, Samsung LSI, Google Tensor) ships Linux drivers only. There is no alternative kernel that supports:</p>
+  <ul>
+    <li>Cellular basebands (calls, SMS, data)</li>
+    <li>Mobile GPUs (Adreno, Mali, Imagination)</li>
+    <li>Camera ISPs (image signal processors)</li>
+    <li>Power management (big.LITTLE scheduling, thermal throttling)</li>
+    <li>Display controllers and touch controllers</li>
+    <li>NFC, Bluetooth/BLE, WiFi chipsets</li>
+    <li>Fingerprint sensors, face unlock hardware</li>
+  </ul>
+
+  <h2>What About Alternatives?</h2>
+
+  <table>
+    <tr><th>Kernel</th><th>What it is</th><th>Phone-ready?</th><th>Why not</th></tr>
+    <tr>
+      <td><strong>Fuchsia (Zircon)</strong></td>
+      <td>Google's microkernel. Runs on Nest Hub.</td>
+      <td style="color:var(--red)">No</td>
+      <td>8+ years of development. Zero phones shipped. No cellular, no phone GPUs, no camera ISPs. Google hasn't committed to it for phones.</td>
+    </tr>
+    <tr>
+      <td><strong>seL4</strong></td>
+      <td>Formally verified microkernel. Military/aerospace.</td>
+      <td style="color:var(--red)">No</td>
+      <td>No mobile hardware drivers at all. Designed for high-assurance embedded systems, not consumer phones.</td>
+    </tr>
+    <tr>
+      <td><strong>QNX</strong></td>
+      <td>BlackBerry's microkernel. Used in cars.</td>
+      <td style="color:var(--red)">Dead for phones</td>
+      <td>Was in BlackBerry 10 phones. That platform is discontinued. No modern phone driver support.</td>
+    </tr>
+    <tr>
+      <td><strong>Custom microkernel</strong></td>
+      <td>Build from scratch.</td>
+      <td style="color:var(--red)">10+ years, $100M+</td>
+      <td>Would need to write every phone hardware driver from scratch. No SoC vendor would provide support. This is how operating systems die before they're born.</td>
+    </tr>
+    <tr>
+      <td><strong>Windows CE / Phone</strong></td>
+      <td>Microsoft's mobile kernel.</td>
+      <td style="color:var(--red)">Dead</td>
+      <td>Discontinued. No modern hardware support.</td>
+    </tr>
+  </table>
+
+  <h2>The Real Decision</h2>
+  <p>Linux is a pragmatic lock-in, not an aspirational choice. The real decision isn't the kernel. It's <strong>what we put above it</strong>:</p>
+  <ul>
+    <li>The AI interaction model</li>
+    <li>The web app runtime</li>
+    <li>The Capability Broker</li>
+    <li>The app generation pipeline</li>
+    <li>The permission and audit system</li>
+  </ul>
+  <p>Linux handles hardware. Our innovation is everything above it.</p>
+
+  <div class="page-nav">
+    <a href="stack.html">&larr; Architecture</a>
+    <a href="runtime.html">Runtime Decision &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

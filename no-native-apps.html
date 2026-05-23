@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Why No Native Apps — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Why No Native Apps</h1>
+  <p class="subtitle">Web apps only. No Android APKs. No compatibility layer. A clean break.</p>
+
+  <h2>The Decision</h2>
+  <p>AIPhone OS runs <strong>only web apps</strong> (TWAs). No Android APK support. No compatibility shim. No "run your existing apps" promise.</p>
+  <p>This is the boldest and most controversial decision in the project. Here's why it's right.</p>
+
+  <h2>The Challenge</h2>
+  <blockquote>"Name one app that can't be a web app that users can't live without."</blockquote>
+
+  <h3>Apps that MUST be native (truly cannot be web):</h3>
+  <table>
+    <tr><th>App</th><th>Why it can't be web</th><th>Our answer</th></tr>
+    <tr><td>NFC tap-to-pay (Google/Apple Pay)</td><td>Requires Secure Element hardware access</td><td>Deferred to Phase 4+. Use web banking or physical card.</td></tr>
+    <tr><td>Government ID apps</td><td>Require certified secure enclaves</td><td>Niche. Physical ID works.</td></tr>
+    <tr><td>Background push (app killed)</td><td>Requires platform push service (FCM/APNs)</td><td>Build our own: UnifiedPush system service.</td></tr>
+  </table>
+
+  <h3>Apps that people THINK must be native but aren't:</h3>
+  <table>
+    <tr><th>App category</th><th>Web version exists?</th><th>Works as web app?</th></tr>
+    <tr><td>Banking</td><td style="color:var(--green)">Yes -- every major bank has a web app</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Email</td><td style="color:var(--green)">Yes -- Gmail, Outlook, etc.</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Maps / navigation</td><td style="color:var(--green)">Yes -- Google Maps, OpenStreetMap</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Messaging</td><td style="color:var(--green)">Yes -- WhatsApp Web, Telegram Web, Signal Web</td><td style="color:var(--yellow)">Works but needs push solution</td></tr>
+    <tr><td>Social media</td><td style="color:var(--green)">Yes -- Twitter/X, Reddit, Instagram (limited)</td><td style="color:var(--green)">Mostly full</td></tr>
+    <tr><td>Shopping</td><td style="color:var(--green)">Yes -- Amazon, eBay, every retailer</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>News</td><td style="color:var(--green)">Yes -- every news site is a web app</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Music streaming</td><td style="color:var(--green)">Yes -- Spotify Web, YouTube Music</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Video streaming</td><td style="color:var(--green)">Yes -- YouTube, Netflix</td><td style="color:var(--green)">Full functionality (may lack downloads)</td></tr>
+    <tr><td>Ride sharing</td><td style="color:var(--green)">Yes -- Uber, Lyft have web versions</td><td style="color:var(--green)">Full booking functionality</td></tr>
+    <tr><td>Food delivery</td><td style="color:var(--green)">Yes -- DoorDash, UberEats web</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Weather</td><td style="color:var(--green)">Yes -- or AI generates one</td><td style="color:var(--green)">Full functionality</td></tr>
+    <tr><td>Calculator, timer, notes</td><td style="color:var(--green)">Yes -- or AI generates one</td><td style="color:var(--green)">AI generates these instantly</td></tr>
+  </table>
+
+  <h2>Why This Is the Moat</h2>
+  <p>Apple and Google will <strong>never</strong> give web apps deep system access. Here's why:</p>
+  <ul>
+    <li><strong>App Store revenue:</strong> Apple takes 30% of native app purchases. Web apps bypass the store entirely. Apple has actively sabotaged PWA support on iOS to protect this revenue.</li>
+    <li><strong>Developer lock-in:</strong> Swift and Kotlin skills don't transfer across platforms. Web skills do. If web apps worked as well as native, developers would stop writing platform-specific code.</li>
+    <li><strong>Platform switching cost:</strong> If all your apps are web apps, switching from iPhone to Android (or to AIPhone OS) costs nothing. Apple and Google benefit from the switching cost that native apps create.</li>
+  </ul>
+  <p>AIPhone OS has <strong>no app store revenue to protect</strong>. We want web apps to be more powerful than native. That's the product, not a threat to it.</p>
+
+  <h2>What About Firefox OS?</h2>
+  <p>Firefox OS (2012-2015) tried web-only and failed. But it failed for specific reasons:</p>
+  <ul>
+    <li>Web apps had <strong>no more capability than a browser tab</strong> -- no deep hardware access</li>
+    <li>Targeted <strong>low-end hardware</strong> in emerging markets -- poor performance</li>
+    <li><strong>No AI</strong> -- users still had to find and install pre-built apps. No generation.</li>
+    <li>App ecosystem was <strong>thin</strong> -- developers had no reason to build for a niche platform</li>
+  </ul>
+  <p>Every one of these problems has a different answer today:</p>
+  <ul>
+    <li>Our TWAs get <strong>deeper access than native apps</strong> via the Capability Broker</li>
+    <li>We target <strong>flagship hardware</strong> (Pixel 8, Tensor G3)</li>
+    <li><strong>AI generates apps</strong> -- the ecosystem bootstraps from day one</li>
+    <li>Apps are <strong>personal</strong> -- they don't need a marketplace to exist</li>
+  </ul>
+
+  <h2>The Risk</h2>
+  <p>This is the biggest bet in the project. If users can't live without native-only capabilities (NFC payments, specific government apps), this OS cannot be a daily driver.</p>
+  <p><strong>Mitigation:</strong> Start with the enthusiast/developer segment that accepts trade-offs. Monitor which native apps users actually miss. Phase 3+ evaluates a minimal Android compatibility shim if the evidence demands it. But the default position is: web apps are enough.</p>
+
+  <div class="page-nav">
+    <a href="comparison.html">&larr; vs iOS / Android</a>
+    <a href="twa.html">Trusted Web Apps &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
