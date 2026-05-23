@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OS Foundation Research — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.verdict-box { background: var(--surface); border: 2px solid var(--green); border-radius: 10px; padding: 20px; margin: 20px 0; }
+.verdict-box h3 { color: var(--green); margin-bottom: 8px; }
+.dead { opacity: 0.5; }
+.dead h3 { text-decoration: line-through; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>OS Foundation Research</h1>
+  <p class="subtitle">What can we actually build on, given Pixel 8 as the target device?</p>
+
+  <h2>The Core Problem</h2>
+  <p>Phone hardware drivers (camera ISP, cellular modem, GPU, BLE radio) only exist in two forms:</p>
+  <ul>
+    <li><strong>Android HALs</strong> -- binary blobs that plug into Android's Hardware Abstraction Layer</li>
+    <li><strong>Mainline Linux drivers</strong> -- open source drivers in the upstream Linux kernel (incomplete for most phones)</li>
+  </ul>
+  <p>Every non-Android phone OS must solve this: how do you talk to the hardware without Android?</p>
+
+  <h2>The Two Approaches</h2>
+
+  <table>
+    <tr><th></th><th>Use Android's drivers directly (AOSP)</th><th>Bridge Android's drivers into Linux (Halium)</th><th>Use mainline Linux drivers (postmarketOS)</th></tr>
+    <tr><td><strong>How it works</strong></td><td>Build from AOSP source. Android framework runs. You add your UI on top.</td><td>Keep Android's kernel + HALs. Use libhybris to bridge them into a standard Linux userspace (Debian/Ubuntu).</td><td>Use upstream Linux kernel with open-source drivers. No Android code at all.</td></tr>
+    <tr><td><strong>What you get</strong></td><td>Full hardware. Android framework as overhead.</td><td>Full hardware (if ported). Clean Linux system. No Android framework.</td><td>Clean Linux. Partial hardware.</td></tr>
+    <tr><td><strong>The catch</strong></td><td>Android framework is bloated and hard to strip</td><td>Requires per-device porting work</td><td>Drivers are incomplete -- camera, BLE, cellular often broken</td></tr>
+  </table>
+
+  <h2>Pixel 8 Support Status (Researched May 2026)</h2>
+
+  <table>
+    <tr><th>Foundation</th><th>Pixel 8 port exists?</th><th>Camera</th><th>Mic</th><th>WiFi</th><th>Cellular</th><th>BLE</th><th>Status</th></tr>
+    <tr>
+      <td><strong>AOSP (stripped)</strong></td>
+      <td class="yes" style="color:var(--green)">Yes -- Google's reference device</td>
+      <td class="yes" style="color:var(--green)">Yes</td>
+      <td class="yes" style="color:var(--green)">Yes</td>
+      <td class="yes" style="color:var(--green)">Yes</td>
+      <td class="yes" style="color:var(--green)">Yes</td>
+      <td class="yes" style="color:var(--green)">Yes</td>
+      <td>Production-ready</td>
+    </tr>
+    <tr>
+      <td><strong>Halium / Droidian</strong></td>
+      <td style="color:var(--red)">No port exists</td>
+      <td colspan="5" style="color:var(--text-2)">N/A -- would work if ported</td>
+      <td>Needs volunteer porter</td>
+    </tr>
+    <tr>
+      <td><strong>Ubuntu Touch</strong></td>
+      <td style="color:var(--red)">No -- newest Pixel is 3a (2019)</td>
+      <td colspan="5" style="color:var(--text-2)">N/A</td>
+      <td>No plans for Pixel 8</td>
+    </tr>
+    <tr>
+      <td><strong>postmarketOS</strong></td>
+      <td style="color:var(--yellow)">Partial</td>
+      <td style="color:var(--red)">Basic only</td>
+      <td style="color:var(--green)">Yes</td>
+      <td style="color:var(--green)">Yes</td>
+      <td style="color:var(--yellow)">Partial</td>
+      <td style="color:var(--yellow)">Basic</td>
+      <td>Experimental</td>
+    </tr>
+    <tr>
+      <td><strong>SailfishOS</strong></td>
+      <td style="color:var(--red)">No port exists</td>
+      <td colspan="5" style="color:var(--text-2)">N/A</td>
+      <td>Partly proprietary</td>
+    </tr>
+  </table>
+
+  <h2>Detailed Analysis</h2>
+
+  <h3>1. AOSP Minimal (Stripped Android)</h3>
+  <p>Take AOSP source for Pixel 8. Remove all stock apps. Add your WebView runtime as the only visible process. Android framework runs invisibly underneath.</p>
+
+  <p><strong>Pros:</strong></p>
+  <ul>
+    <li>100% hardware support on Pixel 8 -- Google's own reference device, best-documented target</li>
+    <li>All drivers work: camera (including Tensor G3 ISP), cellular, BLE, NFC, GPS, WiFi, sensors, GPU</li>
+    <li>Security infrastructure included: verified boot, SELinux, dm-verity, full-disk encryption</li>
+    <li>OTA update mechanism built in (A/B partitions)</li>
+    <li>Massive documentation and community (LineageOS, GrapheneOS, CalyxOS all use AOSP)</li>
+    <li>Can strip apps in 1 day via build config -- no surgery needed</li>
+  </ul>
+
+  <p><strong>Cons:</strong></p>
+  <ul>
+    <li>100GB source download, 2-4 hour builds, needs Linux (Docker on macOS)</li>
+    <li>Android framework runs underneath even if invisible -- ~1.5GB system image</li>
+    <li>Framework is a monolith -- stripping it beyond removing apps is months of work</li>
+    <li>Java/ART runtime is still there (for system services), even if no third-party apps use it</li>
+    <li>Feels philosophically wrong -- "building a new OS" on top of the OS you're trying to replace</li>
+  </ul>
+
+  <h3>2. Halium + Droidian (Debian with Android Drivers)</h3>
+  <p>Halium keeps Android's kernel and HAL drivers but replaces everything above with standard Linux. Droidian is Debian running on Halium. You get apt-get, systemd, bash, and a normal Linux system with working phone hardware.</p>
+
+  <p><strong>Pros:</strong></p>
+  <ul>
+    <li>Clean Linux system -- no Android framework, no ART, no Java</li>
+    <li>Standard Linux development: apt, systemd, bash, familiar tools</li>
+    <li>Small image (~500MB vs ~1.5GB for AOSP)</li>
+    <li>Full hardware support through Android drivers via libhybris bridge</li>
+    <li>Philosophically right -- it's a real Linux OS, not Android with a mask</li>
+    <li>Could run a minimal Wayland compositor + fullscreen Chromium as the entire UI</li>
+  </ul>
+
+  <p><strong>Cons:</strong></p>
+  <ul>
+    <li><strong>No Pixel 8 port exists.</strong> Someone needs to create the Halium device adaptation. This is a significant project (weeks to months for an experienced porter).</li>
+    <li>Halium porting requires deep knowledge of Android kernel, device trees, and HAL interfaces</li>
+    <li>libhybris bridge adds complexity and potential instability</li>
+    <li>Smaller community than AOSP -- fewer resources, slower bug fixes</li>
+    <li>Camera support through Halium can be finicky (requires working with Android's camera HAL through droid-media)</li>
+    <li>We'd be doing TWO projects: porting Halium AND building our OS</li>
+  </ul>
+
+  <h3 class="dead">3. Ubuntu Touch</h3>
+  <p class="dead">Ubuntu + Halium. Same driver approach as Droidian but Ubuntu-based. More polished phone UX built in. But the newest supported Pixel is the 3a from 2019. UBports community is volunteer-driven with no plans for Pixel 8. <strong>Not viable.</strong></p>
+
+  <h3>4. postmarketOS (Mainline Linux)</h3>
+  <p>Alpine Linux with mainline Linux kernel. No Android code at all. Pure open source. The dream.</p>
+
+  <p><strong>Pros:</strong></p>
+  <ul>
+    <li>Truly minimal -- ~400MB image, fast boot</li>
+    <li>No Android anything -- pure Linux, pure open source</li>
+    <li>Standard Linux: apk, OpenRC, musl libc</li>
+    <li>Active community working on mainline drivers for many devices</li>
+    <li>Philosophically perfect -- a clean-slate Linux phone</li>
+  </ul>
+
+  <p><strong>Cons:</strong></p>
+  <ul>
+    <li><strong>Camera barely works on Pixel 8.</strong> Tensor G3 ISP requires complex driver work. libcamera support is immature.</li>
+    <li><strong>BLE is basic.</strong> Scanning works, advanced profiles and peripheral mode unlikely.</li>
+    <li><strong>Cellular is partial.</strong> Calls may not work reliably. Data is better.</li>
+    <li>GPU acceleration partial -- no Vulkan, no WebGPU</li>
+    <li>Battery life significantly worse than Android</li>
+    <li>These hardware gaps will take months or years to fix upstream -- not in our control</li>
+  </ul>
+
+  <h3 class="dead">5. SailfishOS</h3>
+  <p class="dead">Jolla's Linux OS. Uses Halium for drivers. Has a nice UI. But parts are proprietary (the Silica UI framework), no Pixel 8 port, and Jolla's future is uncertain. <strong>Not viable.</strong></p>
+
+  <h3 class="dead">6. Custom Linux (Buildroot/Yocto)</h3>
+  <p class="dead">Build everything from scratch. Maximum control. But no phone drivers at all -- you'd need to port every driver manually. Camera: no. Cellular: no. BLE: no. GPU: no. This is a multi-year, multi-team project before you get a single phone call working. <strong>Not viable for a solo founder.</strong></p>
+
+  <h2>The Decision Matrix</h2>
+
+  <table>
+    <tr><th>Criterion</th><th>AOSP Minimal</th><th>Halium/Droidian</th><th>postmarketOS</th></tr>
+    <tr><td>Time to working prototype</td><td style="color:var(--green)">Days-weeks</td><td style="color:var(--red)">Months (porting first)</td><td style="color:var(--yellow)">Days (but broken camera)</td></tr>
+    <tr><td>Camera works</td><td style="color:var(--green)">Yes</td><td style="color:var(--green)">Yes (if ported)</td><td style="color:var(--red)">Barely</td></tr>
+    <tr><td>BLE works</td><td style="color:var(--green)">Yes</td><td style="color:var(--green)">Yes (if ported)</td><td style="color:var(--yellow)">Basic only</td></tr>
+    <tr><td>Cellular works</td><td style="color:var(--green)">Yes</td><td style="color:var(--green)">Yes (if ported)</td><td style="color:var(--yellow)">Partial</td></tr>
+    <tr><td>System bloat</td><td style="color:var(--red)">~1.5GB (framework hidden)</td><td style="color:var(--green)">~500MB</td><td style="color:var(--green)">~400MB</td></tr>
+    <tr><td>Philosophical cleanliness</td><td style="color:var(--red)">Android underneath</td><td style="color:var(--green)">Real Linux</td><td style="color:var(--green)">Pure Linux</td></tr>
+    <tr><td>Maintenance burden</td><td style="color:var(--yellow)">Medium (AOSP merges)</td><td style="color:var(--red)">High (Halium + Debian)</td><td style="color:var(--yellow)">Medium (upstream deps)</td></tr>
+    <tr><td>Pixel 8 port exists</td><td style="color:var(--green)">Yes</td><td style="color:var(--red)">No</td><td style="color:var(--yellow)">Partial</td></tr>
+    <tr><td>Solo founder feasible</td><td style="color:var(--green)">Yes</td><td style="color:var(--yellow)">Stretch</td><td style="color:var(--yellow)">If you accept broken camera</td></tr>
+  </table>
+
+  <h2>Conclusion</h2>
+
+  <div class="verdict-box">
+    <h3>Use AOSP Minimal. Accept the bloat. Ship the product.</h3>
+    <p>The Android framework running invisibly underneath is philosophically ugly. But it's the only path that gives you <strong>working camera + mic + BLE + cellular on Pixel 8 today</strong>, without months of porting work first.</p>
+    <p>The user never sees Android. They see your AI chat, your generated apps, your Capability Broker. What runs underneath is an implementation detail, not the product.</p>
+    <p>If this project succeeds and you build a team, you can:</p>
+    <ul>
+      <li>Port Halium to Pixel 8 and migrate to a clean Linux base</li>
+      <li>Contribute to postmarketOS mainline drivers and switch when camera/BLE work</li>
+      <li>Build a custom AOSP fork that strips the framework more aggressively</li>
+    </ul>
+    <p>But none of that matters until you prove that "talk to phone, get app" is something people want. <strong>Don't let the perfect foundation delay the product.</strong></p>
+  </div>
+
+  <h2>Future Migration Path</h2>
+  <p>The architecture is designed so the foundation can change without rebuilding the product:</p>
+  <pre><code>Today:     AOSP (stripped) → HALs → Kernel → Hardware
+                ↑ your WebView sits here, talks to Capability Broker
+
+Tomorrow:  Halium/Droidian → libhybris → HALs → Kernel → Hardware
+                ↑ same WebView, same Broker, different plumbing
+
+Someday:   postmarketOS → mainline drivers → Kernel → Hardware
+                ↑ same WebView, same Broker, no Android at all</code></pre>
+  <p>Your product code (the AI chat, the Capability Broker, the generated web apps) stays the same regardless of what's underneath. The foundation is swappable.</p>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://docs.halium.org/en/latest/supplementary/devices/index.html" target="_blank" rel="noopener">Halium Device Overview</a> -- no Pixel 8 listed</li>
+    <li><a href="https://devices.droidian.org/" target="_blank" rel="noopener">Droidian Supported Devices</a> -- no Pixel 8 listed</li>
+    <li><a href="https://devices.ubuntu-touch.io/" target="_blank" rel="noopener">Ubuntu Touch Devices</a> -- newest Pixel is 3a</li>
+    <li><a href="https://forums.ubports.com/topic/11838/what-are-chances-of-any-google-pixel-newer-than-3a-getting-ubuntu-touch-support" target="_blank" rel="noopener">UBports Forum: Pixel support discussion</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Halium" target="_blank" rel="noopener">Halium (Wikipedia)</a></li>
+    <li><a href="https://droidian.org/" target="_blank" rel="noopener">Droidian Project</a></li>
+    <li><a href="https://wiki.lineageos.org/devices/shiba/" target="_blank" rel="noopener">LineageOS Pixel 8 (shiba) wiki</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="os-paths.html">&larr; OS Build Paths</a>
+    <a href="decisions.html">Decisions &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

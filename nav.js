@@ -25,6 +25,7 @@ const NAV = [
   ]},
   { section: 'Engineering', items: [
     { title: 'OS Build Paths', href: 'os-paths.html' },
+    { title: 'OS Foundation', href: 'foundation.html' },
     { title: 'Decisions', href: 'decisions.html' },
     { title: 'Build Path', href: 'buildpath.html' },
     { title: 'Research', href: 'research.html' },
