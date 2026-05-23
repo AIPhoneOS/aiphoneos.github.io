@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Risks — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Risks & Failure Conditions</h1>
+  <p class="subtitle">What could kill this project</p>
+
+  <div class="risk">
+    <h4>1. No existing apps</h4>
+    <p>Users can't run banking, transport, authentication, messaging, maps, or government apps. A phone replacement fails without daily essentials.</p>
+    <p class="mitigation">Mitigation: Start with enthusiast/developer segment that accepts trade-offs. AI generates replacements for simpler apps. Phase 3+ evaluates minimal Android compatibility shim if needed. Don't promise daily-driver until it is one.</p>
+  </div>
+
+  <div class="risk">
+    <h4>2. Security failure of generated apps</h4>
+    <p>Generated code creates security/privacy breaches. Platform loses trust immediately and irreversibly.</p>
+    <p class="mitigation">Mitigation: 9-layer defense model. Generated code is NEVER trusted. Sandboxing, capability broker, static analysis, CSP, audit trail, rollback. Security model must be proven before any public release.</p>
+  </div>
+
+  <div class="risk">
+    <h4>3. AI becomes a feature, not a differentiator</h4>
+    <p>iOS and Android already add AI aggressively. Gemini Nano is on-device. Siri is being rebuilt. "AI phone" becomes table stakes.</p>
+    <p class="mitigation">Mitigation: Differentiate around user-generated personal software and deep web-app access — not just "having an AI assistant." Google/Apple won't give web apps deep access because it kills their app stores.</p>
+  </div>
+
+  <div class="risk">
+    <h4>4. Hardware/device bring-up is too expensive</h4>
+    <p>Making an OS reliable on real phone hardware is enormously complex. Battery, thermal, radio, camera — each is months of work.</p>
+    <p class="mitigation">Mitigation: AOSP does the heavy lifting. Pixel-first narrows hardware support to one well-documented target. Emulator-first development for rapid iteration. Don't attempt broad hardware support until product is proven.</p>
+  </div>
+
+  <div class="risk">
+    <h4>5. Battery and thermal drain</h4>
+    <p>AI-first phone feels unusable because the battery dies in 4 hours.</p>
+    <p class="mitigation">Mitigation: Task budgets, local/cloud routing, deterministic generated apps (AI creates code once, doesn't run every frame). Single OS-level AI scheduler, not dozens of competing agents.</p>
+  </div>
+
+  <div class="risk">
+    <h4>6. Web runtime too constrained</h4>
+    <p>Even with deep access, web apps feel slower or more limited than native apps. Performance perception kills adoption.</p>
+    <p class="mitigation">Mitigation: WebGPU for compute, aggressive caching, Chromium's JIT compilation. Most generated apps are simple enough that web performance is a non-issue. For complex cases, profile and optimize the runtime.</p>
+  </div>
+
+  <div class="risk">
+    <h4>7. Perceived as "just another Android ROM"</h4>
+    <p>AOSP substrate makes the product look like LineageOS with a chatbot. Fails to communicate the paradigm shift.</p>
+    <p class="mitigation">Mitigation: Clear identity — independent OS with own system UX, own app format, own runtime. The user experience must feel radically different from Android, not like a theme.</p>
+  </div>
+
+  <div class="risk">
+    <h4>8. Carrier/regulatory requirements</h4>
+    <p>Selling as a phone requires emergency calling, carrier certification, regulatory compliance. These are expensive, slow, and mandatory.</p>
+    <p class="mitigation">Mitigation: Developer device phase before commercial handset. No carrier sales initially. Enthusiast self-flash model avoids most regulatory requirements. Address this in Phase 5 only.</p>
+  </div>
+
+  <div class="risk">
+    <h4>9. No distribution</h4>
+    <p>Great platform, no users. Can't reach people who would benefit.</p>
+    <p class="mitigation">Mitigation: Build enthusiast/developer community first. Open source the system apps. Partner with hardware makers for pre-installed devices later. YouTube/social proof of "I described an app and had it in 10 seconds."</p>
+  </div>
+
+  <div class="risk">
+    <h4>10. Name/IP conflict</h4>
+    <p>"AIPhone" is too close to "iPhone." Apple's legal team will notice.</p>
+    <p class="mitigation">Mitigation: Formal trademark/domain clearance before public launch. "AIPhone" is a working name only. Alternatives explored: AetherOS, AIreOS, LLMware. Professional brand/legal review required.</p>
+  </div>
+
+  <div class="page-nav">
+    <a href="business.html">&larr; Business & Market</a>
+    <a href="decisions.html">Decisions &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

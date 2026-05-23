@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Capability Tiers — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Capability Tiers</h1>
+  <p class="subtitle">Five levels of system access, from automatic to kernel-adjacent</p>
+
+  <div class="tier tier-0">
+    <h3>Tier 0 — Automatic <span class="badge badge-done">no approval</span></h3>
+    <p>Granted at install. No user prompt needed.</p>
+    <ul>
+      <li><strong>storage</strong> — Sandboxed encrypted per-app key-value + SQLite</li>
+      <li><strong>haptics</strong> — Vibration feedback</li>
+      <li><strong>navigation</strong> — Close app, go home</li>
+      <li>UI rendering: Canvas, WebGL, WebGPU</li>
+      <li>Service Workers for offline operation</li>
+    </ul>
+  </div>
+
+  <div class="tier tier-1">
+    <h3>Tier 1 — Standard <span class="badge badge-planned">one-time approval</span></h3>
+    <p>Prompted once, remembered until revoked.</p>
+    <ul>
+      <li><strong>camera</strong> — Photo/video capture, photo picker, live stream</li>
+      <li><strong>microphone</strong> — Record, stream, speech-to-text</li>
+      <li><strong>location</strong> — GPS, watch, geocoding, reverse geocoding</li>
+      <li><strong>notifications</strong> — Local push, scheduled, actionable</li>
+      <li><strong>files</strong> — File picker (import/export)</li>
+      <li><strong>clipboard</strong> — Read/write</li>
+      <li><strong>share</strong> — Native share sheet</li>
+      <li><strong>sensors</strong> — Accelerometer, gyroscope, barometer, proximity, light, step counter</li>
+      <li><strong>ai</strong> — Ask the OS LLM, classify, summarize, extract, vision, embeddings</li>
+    </ul>
+  </div>
+
+  <div class="tier tier-2">
+    <h3>Tier 2 — Elevated <span class="badge badge-wip">explicit approval + explanation</span></h3>
+    <p>User sees what the app will access and why.</p>
+    <ul>
+      <li><strong>filesystem</strong> — Full read/write/watch directories</li>
+      <li><strong>contacts</strong> — Read, create, update, delete</li>
+      <li><strong>calendar</strong> — Events CRUD</li>
+      <li><strong>bluetooth</strong> — Scan, connect, peripheral mode</li>
+      <li><strong>nfc</strong> — Read/write NFC tags</li>
+      <li><strong>usb</strong> — USB host mode, connect devices</li>
+      <li><strong>network</strong> — Raw TCP/UDP sockets, unrestricted HTTP</li>
+      <li><strong>background</strong> — Persistent background tasks with scheduling</li>
+      <li><strong>audio</strong> — Output routing, volume control</li>
+      <li><strong>ipc</strong> — Inter-app communication through OS broker</li>
+    </ul>
+  </div>
+
+  <div class="tier tier-3">
+    <h3>Tier 3 — Privileged <span class="badge badge-critical">audit + visible indicator</span></h3>
+    <p>Prompted every time OR visible system indicator while active.</p>
+    <ul>
+      <li><strong>telephony</strong> — Make calls, send SMS (confirmation UI always shown)</li>
+      <li><strong>system</strong> — Brightness, orientation, wake lock, battery/network info</li>
+      <li><strong>device-admin</strong> — Enterprise policies</li>
+      <li><strong>vpn</strong> — VPN configuration</li>
+      <li><strong>network-filter</strong> — eBPF-based filtering</li>
+      <li><strong>input-method</strong> — Custom keyboards, gesture systems</li>
+      <li><strong>accessibility</strong> — Accessibility services</li>
+      <li><strong>screen-capture</strong> — Screenshot/recording</li>
+    </ul>
+  </div>
+
+  <div class="tier tier-4">
+    <h3>Tier 4 — Kernel-Adjacent <span class="badge badge-critical">phase 3+</span></h3>
+    <p>Extreme power. Defined after the security model is proven in production.</p>
+    <ul>
+      <li><strong>fuse</strong> — User-space filesystems (encrypted vaults, network drives)</li>
+      <li><strong>ebpf</strong> — Custom tracing and network filtering programs</li>
+      <li><strong>scheduling</strong> — Process priority hints</li>
+      <li><strong>drivers</strong> — User-space device I/O</li>
+      <li><strong>audio-dsp</strong> — DSP access for audio processing</li>
+    </ul>
+  </div>
+
+  <h2>Never Exposed to TWAs</h2>
+  <ul>
+    <li>Secure boot / verified boot modification</li>
+    <li>SELinux policy changes</li>
+    <li>Kernel module loading</li>
+    <li>Encryption key management</li>
+    <li>OTA update mechanism</li>
+    <li>Baseband/radio firmware</li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="twa.html">&larr; Trusted Web Apps</a>
+    <a href="broker.html">Broker API &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

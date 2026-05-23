@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Build Path — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Build Path & Phases</h1>
+  <p class="subtitle">From architecture to commercial product</p>
+
+  <div class="card" style="border-left:3px solid var(--green)">
+    <h3>Phase 0 — Architecture & Decisions <span class="badge badge-done">done</span></h3>
+    <ul>
+      <li>Product constitution: OS, not launcher</li>
+      <li>Trust/security specification</li>
+      <li>TWA package and capability model</li>
+      <li>AOSP branch and device selection</li>
+      <li>All critical architecture decisions</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--accent)">
+    <h3>Phase 1 — Bootable Emulator Image <span class="badge badge-planned">next</span></h3>
+    <ul>
+      <li>AOSP-derived bootable build in emulator</li>
+      <li>Custom AI-first system home (TWA)</li>
+      <li>TWA runtime skeleton (Chromium Content Shell)</li>
+      <li>Capability Broker with Tier 0-1 APIs</li>
+      <li>AI app generation flow (cloud)</li>
+      <li>Permission manifest and audit-log UI</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--accent-2)">
+    <h3>Phase 2 — Flashable Pixel 8 Build</h3>
+    <ul>
+      <li>OS image boots on Pixel 8</li>
+      <li>Networking, display, input, storage, notifications working</li>
+      <li>Tier 2 capabilities: Bluetooth, filesystem, contacts, calendar</li>
+      <li>Phone app (dialer, SMS) as TWA</li>
+      <li>Camera integration</li>
+      <li>Phone + tablet adaptive UX</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--yellow)">
+    <h3>Phase 3 — Alpha</h3>
+    <ul>
+      <li>5 killer generated apps demonstrating deep capabilities</li>
+      <li>Local AI model on Tensor G3 TPU</li>
+      <li>Tier 3 capabilities</li>
+      <li>Voice input (local Whisper)</li>
+      <li>Offline app execution and local intent routing</li>
+      <li>Small invited user cohort</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid #ff9500">
+    <h3>Phase 4 — Developer Platform</h3>
+    <ul>
+      <li>TWA SDK and developer tools</li>
+      <li>App manifest/capability documentation</li>
+      <li>Package signing and update path</li>
+      <li>Security review and disclosure process</li>
+      <li>First public developer build</li>
+      <li>App/template marketplace</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--red)">
+    <h3>Phase 5 — Commercialization</h3>
+    <ul>
+      <li>Partner hardware vs own reference device decision</li>
+      <li>OTA policy and device support lifecycle</li>
+      <li>Carrier/regulatory/emergency readiness</li>
+      <li>Business model selection</li>
+      <li>Distribution strategy</li>
+    </ul>
+  </div>
+
+  <div class="page-nav">
+    <a href="decisions.html">&larr; Decisions</a>
+    <a href="research.html">Research &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

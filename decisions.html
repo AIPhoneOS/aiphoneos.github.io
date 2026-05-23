@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Decisions — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Architecture Decisions</h1>
+  <p class="subtitle">Every major decision with rationale and status</p>
+
+  <table>
+    <tr><th>#</th><th>Decision</th><th>Choice</th><th>Status</th></tr>
+    <tr><td>1</td><td>OS Foundation</td><td>AOSP (Android 15) on Linux kernel</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>2</td><td>Target Hardware</td><td>Pixel 8 (shiba) + Emulator</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>3</td><td>Android App Compat</td><td>NONE — web apps only, no APKs</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>4</td><td>App Runtime</td><td>Stripped Chromium (V8 + Blink + Capability Broker)</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>5</td><td>App Format</td><td>Trusted Web App (TWA) with manifest</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>6</td><td>Capability Access</td><td>5 tiers, deep system access, all mediated + audited</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>7</td><td>AI Cloud Model</td><td>Pluggable — Claude (Anthropic) default</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>8</td><td>AI Local Model</td><td>llama.cpp / ONNX on Tensor G3 TPU</td><td><span class="badge badge-planned">phase 3</span></td></tr>
+    <tr><td>9</td><td>Google Mobile Services</td><td>None — fully independent of Google</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>10</td><td>Network Policy</td><td>Local-only default, per-app allowlist</td><td><span class="badge badge-done">decided</span></td></tr>
+    <tr><td>11</td><td>App Sharing</td><td>Export as .twa package, marketplace later</td><td><span class="badge badge-planned">phase 4</span></td></tr>
+    <tr><td>12</td><td>Voice Input</td><td>Platform STT initially, local Whisper later</td><td><span class="badge badge-planned">phase 2</span></td></tr>
+    <tr><td>13</td><td>Brand Name</td><td>Working name only — needs trademark clearance</td><td><span class="badge badge-critical">open</span></td></tr>
+    <tr><td>14</td><td>Business Model</td><td>Not selected — see Business page</td><td><span class="badge badge-critical">open</span></td></tr>
+  </table>
+
+  <h2>Decisions Still Needed</h2>
+  <table>
+    <tr><th>Question</th><th>When</th></tr>
+    <tr><td>Exact AOSP branch tag (latest QPR vs stable)</td><td>Before Phase 1 build</td></tr>
+    <tr><td>Chromium version / Content Shell fork point</td><td>Before Phase 1 runtime</td></tr>
+    <tr><td>TWA package signing mechanism</td><td>Before Phase 2</td></tr>
+    <tr><td>Tablet-specific UX decisions</td><td>Phase 2-3</td></tr>
+    <tr><td>Android compat shim: yes/no</td><td>Phase 3 (based on user feedback)</td></tr>
+    <tr><td>First hardware partner vs own device</td><td>Phase 5</td></tr>
+  </table>
+
+  <div class="page-nav">
+    <a href="risks.html">&larr; Risks</a>
+    <a href="buildpath.html">Build Path &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Security Model — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Security Model</h1>
+  <p class="subtitle">The trust model for AI-generated code</p>
+
+  <blockquote>The product generates code and connects it to sensitive phone capabilities. If this trust model fails, the product fails regardless of usability.</blockquote>
+
+  <h2>Core Principle</h2>
+  <p><strong>Generated code is always untrusted.</strong> Even though the OS's own AI produced it. AI-generated code can be insecure, incorrect, or malicious. The platform assumes the worst and enforces boundaries deterministically.</p>
+
+  <h2>Nine Defense Layers</h2>
+  <table>
+    <tr><th>Layer</th><th>What It Does</th></tr>
+    <tr><td>1. Process Isolation</td><td>Each TWA runs in its own sandboxed process</td></tr>
+    <tr><td>2. Capability Broker</td><td>All system access mediated and enforced by OS code, not app code</td></tr>
+    <tr><td>3. Static Analysis</td><td>Code scanned for dangerous patterns before installation</td></tr>
+    <tr><td>4. CSP Enforcement</td><td>No eval(), no external script loading, strict content policy</td></tr>
+    <tr><td>5. Network Policy</td><td>Default local-only; explicit allowlist for external network</td></tr>
+    <tr><td>6. Permission System</td><td>5-tier approval model, revocable at any time</td></tr>
+    <tr><td>7. Audit Log</td><td>Every privileged action recorded with timestamp and context</td></tr>
+    <tr><td>8. Version History</td><td>Instant rollback to any previous version</td></tr>
+    <tr><td>9. Data Sovereignty</td><td>All data on-device by default, user controls export/deletion</td></tr>
+  </table>
+
+  <h2>Static Analysis Rules</h2>
+  <ul>
+    <li><code>eval()</code> — blocked</li>
+    <li><code>new Function()</code> — blocked</li>
+    <li>Dynamic <code>&lt;script src="..."&gt;</code> from external URLs — blocked</li>
+    <li><code>document.write()</code> — blocked</li>
+    <li>Fetch/XHR to non-allowlisted hosts — blocked by network policy</li>
+    <li>Capability API calls not declared in manifest — flagged, blocked</li>
+    <li>Bundle size exceeding limit — rejected</li>
+  </ul>
+
+  <h2>Generated Code Policy</h2>
+  <p>The OS never trusts code merely because its own AI produced it. Every generated app gets:</p>
+  <ul>
+    <li>The same sandbox as any third-party app</li>
+    <li>The same capability enforcement</li>
+    <li>The same audit logging</li>
+    <li>No elevated privileges based on origin</li>
+  </ul>
+
+  <h2>Data Sovereignty</h2>
+  <ul>
+    <li>All user data on-device by default. No cloud sync unless explicitly opted in per-app.</li>
+    <li>User can export all data from any app as JSON at any time.</li>
+    <li>User can delete all data from any app instantly.</li>
+    <li>Deleted data is cryptographically wiped, not just unlinked.</li>
+    <li>Cloud AI queries are transient — no conversation history stored server-side.</li>
+    <li>The OS never sends personal data to train AI models.</li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="generation.html">&larr; App Generation</a>
+    <a href="audit.html">Audit & Permissions &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

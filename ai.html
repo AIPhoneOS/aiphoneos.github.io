@@ -1,0 +1,76 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Architecture — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>AI Architecture</h1>
+  <p class="subtitle">The intelligence layer of the OS</p>
+
+  <blockquote>The AI is the orchestration and creation layer, not the kernel or security layer.</blockquote>
+
+  <h2>What AI Does</h2>
+  <ul>
+    <li>App generation from natural language</li>
+    <li>App modification and updates</li>
+    <li>Intent classification and routing</li>
+    <li>Contextual suggestions and dashboards</li>
+    <li>In-app AI access (via <code>aiphone.ai.*</code>)</li>
+    <li>Workflow automation across approved apps</li>
+    <li>Explanations of actions and permissions</li>
+  </ul>
+
+  <h2>What AI Cannot Own</h2>
+  <ul>
+    <li>Secure boot or verified boot</li>
+    <li>Process isolation or sandboxing enforcement</li>
+    <li>Encryption key custody</li>
+    <li>Permission enforcement (Capability Broker handles this deterministically)</li>
+    <li>Payment authorization without explicit user confirmation</li>
+    <li>Silent expansion of permissions</li>
+    <li>Kernel scheduling or radio/telephony safety</li>
+  </ul>
+
+  <h2>Model Tiering</h2>
+  <table>
+    <tr><th>Workload</th><th>Phase 1</th><th>Phase 3+</th></tr>
+    <tr><td>App generation</td><td>Cloud (Claude Sonnet)</td><td>Cloud or strong local</td></tr>
+    <tr><td>App modification</td><td>Cloud (Claude Sonnet)</td><td>Cloud or local</td></tr>
+    <tr><td>Intent routing</td><td>Cloud (Claude Haiku)</td><td>Small local model</td></tr>
+    <tr><td>In-app AI queries</td><td>Cloud</td><td>Local for simple, cloud for complex</td></tr>
+    <tr><td>Speech-to-text</td><td>Platform STT</td><td>Local Whisper</td></tr>
+    <tr><td>Embeddings/search</td><td>Cloud</td><td>Local vector DB</td></tr>
+    <tr><td>Vision/OCR</td><td>Cloud</td><td>Local on Tensor TPU</td></tr>
+  </table>
+
+  <h2>Performance & Battery</h2>
+  <ul>
+    <li>AI responds to explicit user intents — not constant background activity</li>
+    <li>System job queue with compute/token/battery budgets per task</li>
+    <li>Generated apps run deterministic code — AI is not called to render UI</li>
+    <li>Single OS-level AI scheduler (not dozens of uncoordinated app agents)</li>
+    <li>Local models for low-latency private tasks when hardware permits</li>
+    <li>Cloud models only when allowed by user and connectivity</li>
+    <li>All AI actions visible in audit trail</li>
+  </ul>
+
+  <h2>Pluggable Architecture</h2>
+  <p>The AI layer is provider-agnostic. Claude is the default, but users can configure alternatives. The system defines interfaces, not implementations:</p>
+  <ul>
+    <li><strong>AppGenerator</strong> — takes prompt + context, returns HTML/manifest</li>
+    <li><strong>IntentRouter</strong> — takes user text, returns action classification</li>
+    <li><strong>QueryHandler</strong> — handles in-app AI queries</li>
+    <li><strong>Transcriber</strong> — speech to text</li>
+    <li><strong>Embedder</strong> — text to vectors</li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="lifecycle.html">&larr; App Lifecycle</a>
+    <a href="generation.html">App Generation &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

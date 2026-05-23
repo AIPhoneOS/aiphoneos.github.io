@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>App Generation — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>App Generation Pipeline</h1>
+  <p class="subtitle">How "make me a workout tracker" becomes a running app</p>
+
+  <h2>Pipeline</h2>
+  <pre><code>User Prompt
+  |  "Make me a spending tracker with receipt photos"
+  v
+Intent Classification
+  |  Is this "create app" / "modify app" / "question" / "action"?
+  v
+Clarification (if needed)
+  |  "Should it categorize expenses automatically?" (max 1 question)
+  v
+AI App Generator (Claude Sonnet)
+  |  System prompt with TWA API docs + design constraints
+  |  Output: { manifest.json, index.html }
+  v
+Security Analysis
+  |  CSP compliance, deny-list scan, capability audit
+  |  PASS or REGENERATE
+  v
+Permission Approval UI
+  |  "This app needs: storage, camera" — user approves
+  v
+TWA Package Creation
+  |  Sign, store, create v1 in history
+  v
+App Installed & Running</code></pre>
+
+  <h2>AI System Prompt (Key Constraints)</h2>
+  <ul>
+    <li>Generate a single self-contained HTML file with inline CSS and JS</li>
+    <li>Dark theme matching OS design language (#1c1c1e bg, #fff text, #0a84ff accent)</li>
+    <li>Mobile-first responsive layout (390px phone, up to 1024px tablet)</li>
+    <li>Touch-friendly: 44px minimum tap targets</li>
+    <li>Use <code>window.aiphone.*</code> APIs — no raw browser APIs for capabilities</li>
+    <li>Declare all required capabilities in manifest</li>
+    <li>Data stays local by default (local-only network policy)</li>
+    <li>No eval(), no dynamic external script loading</li>
+  </ul>
+
+  <h2>Failure Handling</h2>
+  <table>
+    <tr><th>Failure</th><th>Response</th></tr>
+    <tr><td>Network unavailable</td><td>"Cloud AI needed. Connect or try a simpler request."</td></tr>
+    <tr><td>Generation timeout</td><td>Retry with simplified prompt</td></tr>
+    <tr><td>Token limit exceeded</td><td>Split into smaller app + suggest enhancements</td></tr>
+    <tr><td>Static analysis fails</td><td>Auto-regenerate with tighter constraints (max 2 retries)</td></tr>
+    <tr><td>Generated app crashes</td><td>User can rollback, ask AI to fix, or report</td></tr>
+    <tr><td>Ambiguous request</td><td>AI asks one clarifying question, sets sensible defaults for the rest</td></tr>
+  </table>
+
+  <h2>Cost Management</h2>
+  <ul>
+    <li>Each generation has a token budget (visible to user in settings)</li>
+    <li>Simple apps: ~2K tokens output (~$0.01)</li>
+    <li>Complex apps: ~8K tokens output (~$0.05)</li>
+    <li>Modifications: typically cheaper than full generation</li>
+    <li>Users set a monthly AI budget; OS warns before exceeding</li>
+    <li>Offline intent routing (Phase 3+) avoids cloud costs for simple interactions</li>
+  </ul>
+
+  <h2>Validation Before Install</h2>
+  <ol>
+    <li><strong>CSP check</strong> — inject strict Content-Security-Policy headers</li>
+    <li><strong>Pattern deny-list</strong> — reject eval(), Function(), document.write(), external script URLs</li>
+    <li><strong>Capability audit</strong> — flag any <code>aiphone.*</code> calls not declared in manifest</li>
+    <li><strong>Size check</strong> — reject bundles over limit (default: 2MB)</li>
+    <li><strong>Render test</strong> — headless render to catch obvious layout/crash issues</li>
+  </ol>
+
+  <div class="page-nav">
+    <a href="ai.html">&larr; AI Architecture</a>
+    <a href="security.html">Security Model &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

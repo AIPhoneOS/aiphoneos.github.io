@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Vision & Thesis — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button>
+<div class="sidebar-overlay"></div>
+<div class="layout">
+<nav class="sidebar"></nav>
+<div class="main">
+
+  <h1>AIPhone OS</h1>
+  <p class="subtitle">An AI-native operating system for phones and tablets</p>
+
+  <blockquote>
+    A new operating system where users create, customise and operate personal
+    software through conversation. Web apps are the only app format. The AI is
+    the primary interaction layer. The device creates software for its owner.
+  </blockquote>
+
+  <h2>The Shift</h2>
+  <table>
+    <tr><th>Today (iOS / Android)</th><th>AIPhone OS</th></tr>
+    <tr><td>Developers predict needs, build apps</td><td>Users describe needs, OS creates apps</td></tr>
+    <tr><td>Users search app stores</td><td>Users talk to their phone</td></tr>
+    <tr><td>Apps are fixed, one-size-fits-all</td><td>Apps are personal, generated for you</td></tr>
+    <tr><td>Native SDKs lock developers in</td><td>Web tech is the universal app format</td></tr>
+    <tr><td>AI is a feature inside the OS</td><td>AI IS the primary interaction layer</td></tr>
+    <tr><td>Web apps are second-class citizens</td><td>Web apps get deeper access than native apps ever could</td></tr>
+  </table>
+
+  <h2>The Core Promise</h2>
+  <blockquote>
+    Software becomes something the device creates for its owner,
+    not something the owner downloads from a store.
+  </blockquote>
+
+  <h2>Example Interactions</h2>
+  <div class="card">
+    <p><strong>"Create an app that records my child's swimming times, plots improvement and reminds me before meets."</strong></p>
+    <p style="color:var(--text-2);font-size:13px;margin:0">The OS generates a fully functional web app with timer input, chart view, calendar integration, and push notifications. Installed in seconds. Works on phone and tablet.</p>
+  </div>
+  <div class="card">
+    <p><strong>"Make a dashboard showing my calendar, urgent messages, and this week's expenses."</strong></p>
+    <p style="color:var(--text-2);font-size:13px;margin:0">A personal dashboard pulling from your calendar and contacts (with permission). Runs locally, works offline, adapts to phone or tablet screen.</p>
+  </div>
+  <div class="card">
+    <p><strong>"Build a Bluetooth scanner that finds nearby devices and logs signal strength over time."</strong></p>
+    <p style="color:var(--text-2);font-size:13px;margin:0">A web app with full BLE access — something no browser would ever allow. The OS Capability Broker makes it safe and audited.</p>
+  </div>
+
+  <h2>What It Is Not</h2>
+  <ul>
+    <li>Not an Android launcher or skin</li>
+    <li>Not a Capacitor/WebView wrapper app</li>
+    <li>Not a chatbot sitting on top of a normal phone</li>
+    <li>Not an LLM pretending to be a kernel</li>
+    <li>Not a PWA platform limited by browser restrictions</li>
+  </ul>
+
+  <h2>Why This Must Be an OS</h2>
+  <p>A standalone app cannot deliver this vision. It needs platform-level ownership of:</p>
+  <ul>
+    <li>Home screen and primary interaction model</li>
+    <li>App installation, lifecycle, and sandboxing</li>
+    <li>Deep hardware access (BLE, NFC, USB, raw sockets, sensors)</li>
+    <li>Inter-app orchestration and IPC</li>
+    <li>Permission enforcement and audit logging</li>
+    <li>Background execution and power management</li>
+    <li>Secure boot, updates, and recovery</li>
+  </ul>
+  <p>Only an OS can make web apps <strong>more powerful than native apps</strong>.</p>
+
+  <h2>Offline & Local-First</h2>
+  <p>For a phone OS, offline is not optional. Core functions and already-installed generated apps must work without network. Local AI handles intent routing and simple tasks offline; cloud models handle complex generation only when available and permitted.</p>
+
+  <h2>Phones and Tablets</h2>
+  <p>The OS targets both smartphones and tablets. Generated apps use responsive web layout to adapt automatically. The AI home experience adapts to screen size — conversational on phone, dashboard-oriented on tablet.</p>
+
+  <div class="page-nav">
+    <span></span>
+    <a href="stack.html">System Architecture &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

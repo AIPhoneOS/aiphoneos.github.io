@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Broker API — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Capability Broker API</h1>
+  <p class="subtitle"><code>window.aiphone.*</code> — the bridge between web apps and the OS</p>
+
+  <p>Every system capability is accessed through <code>window.aiphone</code>. This is the ONLY bridge. No other native APIs, no hidden channels, no escape hatches. Every call is mediated, enforced, and logged.</p>
+
+  <h2>Core Pattern</h2>
+  <pre><code>// Every API call follows this flow:
+// 1. App calls window.aiphone.capability.method()
+// 2. Capability Broker checks app's manifest
+// 3. Broker checks user's granted permissions
+// 4. If approved: execute and log to audit trail
+// 5. If denied: return error, log the attempt
+
+const photo = await aiphone.camera.capture({ facing: 'back' });
+// Audit: { app: "user.myapp", cap: "camera", act: "capture", result: "ok" }</code></pre>
+
+  <h2>Tier 0 — Storage</h2>
+  <pre><code>// Key-value (sandboxed per-app, encrypted)
+await aiphone.storage.set('prefs', JSON.stringify({ theme: 'dark' }));
+const prefs = await aiphone.storage.get('prefs');
+await aiphone.storage.remove('prefs');
+const keys = await aiphone.storage.list();
+const usage = await aiphone.storage.usage();
+
+// SQLite (structured data)
+await aiphone.storage.execute(
+  'CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT, done INTEGER)'
+);
+await aiphone.storage.execute(
+  'INSERT INTO items (name, done) VALUES (?, ?)', ['Buy milk', 0]
+);
+const rows = await aiphone.storage.query(
+  'SELECT * FROM items WHERE done = ?', [0]
+);</code></pre>
+
+  <h2>Tier 1 — Camera, Microphone, Location</h2>
+  <pre><code>// Camera
+const photo = await aiphone.camera.capture({ facing: 'back' });
+const photos = await aiphone.camera.selectPhoto({ multiple: true });
+const stream = await aiphone.camera.stream({ facing: 'front' });
+
+// Microphone
+const audio = await aiphone.microphone.record({ maxDuration: 30 });
+const text = await aiphone.microphone.transcribe(audio); // OS-level STT
+
+// Location
+const pos = await aiphone.location.current();
+// { lat: -37.81, lon: 144.96, accuracy: 5, altitude: 31 }
+const handle = aiphone.location.watch(pos => console.log(pos));
+const coords = await aiphone.location.geocode('Collins St, Melbourne');
+const addr = await aiphone.location.reverseGeocode(-37.81, 144.96);</code></pre>
+
+  <h2>Tier 1 — Notifications, Sensors, AI</h2>
+  <pre><code>// Notifications
+await aiphone.notifications.send('Reminder', 'Meeting in 10 min');
+const id = await aiphone.notifications.schedule('Workout', 'Time to run', tomorrow9am);
+aiphone.notifications.onAction((id, action) => handleAction(id, action));
+
+// Sensors
+aiphone.sensors.accelerometer((x, y, z) => updateTilt(x, y, z));
+aiphone.sensors.stepCounter(steps => updateSteps(steps));
+aiphone.sensors.barometer(pressure => updateAltitude(pressure));
+
+// AI (OS-level LLM)
+const answer = await aiphone.ai.ask('Summarize this receipt');
+const cat = await aiphone.ai.classify('buy eggs', ['shopping','work','exercise']);
+const data = await aiphone.ai.extract(
+  'Meeting with John 3pm tomorrow at cafe',
+  { person: 'string', time: 'string', place: 'string' }
+);
+const desc = await aiphone.ai.vision(photoBlob, 'What items are on this receipt?');
+const vecs = await aiphone.ai.embeddings(['hello', 'world']);</code></pre>
+
+  <h2>Tier 2 — Filesystem, Contacts, Calendar</h2>
+  <pre><code>// Full filesystem access
+const entries = await aiphone.filesystem.readDir('/sdcard/Documents');
+const data = await aiphone.filesystem.readFile('/sdcard/Documents/notes.txt');
+await aiphone.filesystem.writeFile('/sdcard/exports/data.json', jsonBlob);
+aiphone.filesystem.watch('/sdcard/Downloads', event => onNewFile(event));
+
+// Contacts
+const contacts = await aiphone.contacts.list({ query: 'John' });
+const id = await aiphone.contacts.create({ name: 'Jane', phone: '+61...' });
+await aiphone.contacts.update(id, { email: 'jane@example.com' });
+
+// Calendar
+const events = await aiphone.calendar.events({ from: today, to: nextWeek });
+await aiphone.calendar.create({
+  title: 'Dentist', start: tomorrow2pm, end: tomorrow3pm,
+  reminder: 60 // minutes before
+});</code></pre>
+
+  <h2>Tier 2 — Bluetooth, NFC, USB, Network</h2>
+  <pre><code>// Bluetooth BLE
+const devices = await aiphone.bluetooth.scan({ services: ['heart_rate'] });
+const conn = await aiphone.bluetooth.connect(devices[0].id);
+conn.subscribe('heart_rate', 'measurement', data => updateHR(data));
+
+// BLE peripheral mode (phone becomes a BLE device)
+await aiphone.bluetooth.advertise({
+  name: 'My Sensor',
+  services: [{ uuid: '...', characteristics: [...] }]
+});
+
+// NFC
+const tag = await aiphone.nfc.read();
+await aiphone.nfc.write({ records: [{ type: 'url', data: 'https://...' }] });
+
+// USB host
+const devices = await aiphone.usb.listDevices();
+const conn = await aiphone.usb.connect(devices[0].id);
+
+// Raw sockets
+const tcp = await aiphone.network.tcp.connect('192.168.1.100', 8080);
+tcp.send('hello');
+tcp.onData(data => process(data));
+const udp = await aiphone.network.udp.bind(9000);
+udp.send('192.168.1.255', 9000, 'broadcast');</code></pre>
+
+  <h2>Tier 2 — Background, IPC</h2>
+  <pre><code>// Background tasks
+await aiphone.background.register('sync', async () => {
+  const data = await fetchNewData();
+  await aiphone.storage.set('cache', JSON.stringify(data));
+}, { every: '15m' });
+
+// Inter-app communication
+const result = await aiphone.ipc.send('user.calendar', {
+  action: 'get_events', date: '2026-05-23'
+});
+aiphone.ipc.onMessage((from, msg) => handleMessage(from, msg));
+aiphone.ipc.subscribe('data-updated', msg => refresh());</code></pre>
+
+  <h2>Tier 3 — Telephony, System</h2>
+  <pre><code>// Telephony (ALWAYS shows OS confirmation UI)
+await aiphone.telephony.call('+61412345678');    // user must confirm
+await aiphone.telephony.sendSMS('+61412345678', 'On my way'); // user must confirm
+aiphone.telephony.onSMS((from, body) => logMessage(from, body));
+
+// System
+await aiphone.system.setBrightness(0.8);
+await aiphone.system.setOrientation('landscape');
+await aiphone.system.wakeLock(true);
+const bat = await aiphone.system.batteryInfo(); // { level: 0.72, charging: true }
+const net = await aiphone.system.networkInfo(); // { type: 'wifi', connected: true }</code></pre>
+
+  <div class="page-nav">
+    <a href="capabilities.html">&larr; Capability Tiers</a>
+    <a href="lifecycle.html">App Lifecycle &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

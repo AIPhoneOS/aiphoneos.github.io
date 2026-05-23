@@ -1,0 +1,75 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>App Lifecycle — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>App Lifecycle</h1>
+  <p class="subtitle">From prompt to running app to modification to deletion</p>
+
+  <h2>Creation</h2>
+  <ol>
+    <li>User describes an app: "Make me a workout tracker with exercise history"</li>
+    <li>AI System Service interprets the request</li>
+    <li>If ambiguous, AI asks one clarifying question (not twenty)</li>
+    <li>AI generates a complete HTML/CSS/JS app with manifest</li>
+    <li>OS performs static security analysis (deny-listed patterns, CSP check)</li>
+    <li>OS presents capability summary: "This app needs: storage, notifications"</li>
+    <li>User approves</li>
+    <li>App is packaged as a TWA and installed</li>
+    <li>App appears in gallery, can be pinned to home</li>
+  </ol>
+
+  <h2>Modification</h2>
+  <ol>
+    <li>User says "Add a chart showing weekly progress"</li>
+    <li>AI receives current app code + modification request</li>
+    <li>AI generates updated version</li>
+    <li>OS checks for new capability requirements</li>
+    <li>If new permissions needed: user approves</li>
+    <li>Previous version saved to history</li>
+    <li>App updates in-place, user data preserved</li>
+  </ol>
+
+  <h2>Version History & Rollback</h2>
+  <ul>
+    <li>Every version is automatically preserved</li>
+    <li>User can rollback to any previous version instantly</li>
+    <li>Rollback restores code, preserves user data</li>
+    <li>If rollback removes capabilities, those are revoked immediately</li>
+  </ul>
+
+  <h2>Error & Crash Handling</h2>
+  <ul>
+    <li>If a generated app crashes, the OS catches the error and shows a recovery UI</li>
+    <li>User can: retry, rollback to previous version, or ask AI to fix</li>
+    <li>"Fix this app — it crashes when I add an item" triggers a modification cycle</li>
+    <li>Crash data is logged but never sent externally without consent</li>
+  </ul>
+
+  <h2>Deletion</h2>
+  <ul>
+    <li>User can export all data before deletion (JSON)</li>
+    <li>App code and sandboxed storage are removed</li>
+    <li>Storage is cryptographically wiped</li>
+    <li>Audit log entry preserved (configurable retention)</li>
+  </ul>
+
+  <h2>Generation Failure</h2>
+  <ul>
+    <li>If the AI fails to generate (network error, token limit): clear error message, suggest retry</li>
+    <li>If generated code fails static analysis: AI is asked to regenerate with constraints</li>
+    <li>If generation cost exceeds budget: user is warned before proceeding</li>
+    <li>Offline: "This request needs cloud AI. Connect to generate, or try a simpler request."</li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="broker.html">&larr; Broker API</a>
+    <a href="ai.html">AI Architecture &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Trusted Web Apps — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Trusted Web Apps (TWA)</h1>
+  <p class="subtitle">The only app format on AIPhone OS</p>
+
+  <blockquote>A TWA is a first-class OS citizen built with web technologies. It gets deeper system access than any browser PWA — and deeper than most native apps on iOS/Android can achieve.</blockquote>
+
+  <h2>Package Structure</h2>
+  <pre><code>myapp.twa/
+  manifest.json        # Identity, capabilities, metadata
+  index.html           # Entry point
+  *.js, *.css, *.html  # Application code
+  assets/              # Images, fonts, etc.
+  signature.json       # OS-generated package signature
+  history/             # Version history (auto-managed)
+    v1.bundle
+    v2.bundle</code></pre>
+
+  <h2>Manifest</h2>
+  <pre><code>{
+  "twa_version": "0.2",
+  "id": "user.expense-tracker",
+  "name": "Expense Tracker",
+  "description": "Track daily expenses with receipt photos",
+  "icon": "emoji:receipt",
+  "version": 1,
+  "created_by": "ai-generated",
+  "created_at": "2026-05-23T14:00:00Z",
+  "origin_prompt": "Make me an expense tracker with receipt photos",
+  "capabilities": {
+    "required": ["storage", "camera"],
+    "optional": ["notifications", "share", "ai"]
+  },
+  "storage": { "quota_mb": 50, "encryption": "os-managed" },
+  "network": { "policy": "local-only", "allowed_hosts": [] },
+  "background": { "allowed": false },
+  "data_export": { "format": "json", "user_deletable": true }
+}</code></pre>
+
+  <h2>TWA vs Standard PWA</h2>
+  <table>
+    <tr><th>Feature</th><th>Standard PWA</th><th>AIPhone TWA</th></tr>
+    <tr><td>Filesystem</td><td>File picker only</td><td>Full read/write/watch</td></tr>
+    <tr><td>Bluetooth</td><td>Chrome-only, limited</td><td>Full BLE + peripheral mode</td></tr>
+    <tr><td>NFC</td><td>Chrome-only, limited browser support</td><td>Full read/write</td></tr>
+    <tr><td>Contacts</td><td>No access</td><td>Full CRUD with consent</td></tr>
+    <tr><td>Calendar</td><td>No access</td><td>Full CRUD with consent</td></tr>
+    <tr><td>SMS/Telephony</td><td>No access</td><td>Send/receive with confirmation UI</td></tr>
+    <tr><td>Raw sockets</td><td>No access</td><td>TCP/UDP with policy</td></tr>
+    <tr><td>Background</td><td>Limited Service Worker</td><td>Full persistent execution</td></tr>
+    <tr><td>USB</td><td>Chrome-only, limited</td><td>Full host mode</td></tr>
+    <tr><td>Inter-app</td><td>No access</td><td>IPC through OS broker</td></tr>
+    <tr><td>AI</td><td>No access</td><td>Built-in OS LLM access</td></tr>
+    <tr><td>SQLite</td><td>No access</td><td>Per-app SQLite database</td></tr>
+    <tr><td>Audit</td><td>None</td><td>Every action logged</td></tr>
+    <tr><td>Rollback</td><td>No</td><td>Instant version rollback</td></tr>
+  </table>
+
+  <h2>Killer Demo Apps</h2>
+  <p>Three apps that prove the concept:</p>
+  <div class="card">
+    <h4>1. Personal Tracker</h4>
+    <p style="margin:0;color:var(--text-2);font-size:13px">"Make me a weekly spending tracker with receipt photo upload." Uses: storage, camera, notifications, AI (receipt OCR). Proves personal app generation.</p>
+  </div>
+  <div class="card">
+    <h4>2. Connected Dashboard</h4>
+    <p style="margin:0;color:var(--text-2);font-size:13px">"Show my calendar events, outstanding tasks, and weather." Uses: calendar, storage, network, IPC. Proves cross-app data orchestration.</p>
+  </div>
+  <div class="card">
+    <h4>3. Hardware Capability App</h4>
+    <p style="margin:0;color:var(--text-2);font-size:13px">"Create a Bluetooth device scanner with signal strength logging." Uses: bluetooth, storage, background. Proves deep hardware access no browser allows.</p>
+  </div>
+
+  <div class="page-nav">
+    <a href="comparison.html">&larr; vs iOS / Android</a>
+    <a href="capabilities.html">Capability Tiers &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

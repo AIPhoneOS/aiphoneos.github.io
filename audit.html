@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Audit & Permissions — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Audit & Permissions</h1>
+  <p class="subtitle">Transparency as a product differentiator</p>
+
+  <h2>Audit Log</h2>
+  <p>Every privileged action by every app is logged:</p>
+  <pre><code>{
+  "timestamp": "2026-05-23T14:30:00Z",
+  "app_id": "user.expense-tracker",
+  "capability": "camera",
+  "action": "capture",
+  "result": "success",
+  "user_initiated": true,
+  "data_size_bytes": 245000
+}</code></pre>
+
+  <h2>Permissions Center</h2>
+  <p>Users can see at any time:</p>
+  <ul>
+    <li>Which apps have which permissions</li>
+    <li>When each permission was last used</li>
+    <li>Full history of privileged actions per app</li>
+    <li>Why a permission was requested (linked to original prompt)</li>
+    <li>One-tap revocation of any permission</li>
+    <li>Automatic suggestions to revoke unused permissions</li>
+  </ul>
+
+  <h2>Transparency vs Competitors</h2>
+  <p>Unlike iOS/Android where apps operate opaquely:</p>
+  <ul>
+    <li>Every capability use is logged and visible</li>
+    <li>Every AI action is attributed and explainable</li>
+    <li>Full source code of every generated app is inspectable</li>
+    <li>Users can see exactly why an action was recommended</li>
+    <li>Trust is earned through transparency, not demanded through opacity</li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="security.html">&larr; Security Model</a>
+    <a href="business.html">Business & Market &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
