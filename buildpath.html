@@ -10,22 +10,31 @@
   <p class="subtitle">From architecture to commercial product</p>
 
   <div class="card" style="border-left:3px solid var(--green)">
-    <h3>Phase 0 — Architecture & Decisions <span class="badge badge-done">done</span></h3>
+    <h3>Phase 0a — Architecture & Decisions <span class="badge badge-done">done</span></h3>
     <ul>
-      <li>Product constitution: OS, not launcher</li>
-      <li>Trust/security specification</li>
-      <li>TWA package and capability model</li>
-      <li>AOSP branch and device selection</li>
-      <li>All critical architecture decisions</li>
+      <li>Product constitution: OS, not launcher, not an app</li>
+      <li>Trust/security specification and TWA package model</li>
+      <li>Foundation decision: AOSP Minimal (researched Halium, postmarketOS, others)</li>
+      <li>Runtime decision: Chromium Content Shell (researched V8, WebKit, Servo)</li>
+      <li>No native apps, no frameworks, plain HTML/JS</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left:3px solid var(--green)">
+    <h3>Phase 0b — Demand Validation <span class="badge badge-planned">this week</span></h3>
+    <ul>
+      <li>"Create App" button on FreeAppStore -- AI generates web apps from prompts</li>
+      <li>Watch what people type, what they do with generated apps</li>
+      <li>Runs in parallel with Phase 1 -- validates the thesis while the OS builds</li>
     </ul>
   </div>
 
   <div class="card" style="border-left:3px solid var(--accent)">
-    <h3>Phase 1 — Bootable Emulator Image <span class="badge badge-planned">next</span></h3>
+    <h3>Phase 1 — AOSP Minimal Boot <span class="badge badge-planned">this month</span></h3>
     <ul>
-      <li>AOSP-derived bootable build in emulator</li>
-      <li>Custom AI-first system home (TWA)</li>
-      <li>TWA runtime skeleton (Chromium Content Shell)</li>
+      <li>AOSP Minimal build booting on emulator, then Pixel 8</li>
+      <li>Stock apps stripped, custom AI home screen as only visible UI</li>
+      <li>WebView runtime with plain HTML/JS interface</li>
       <li>Capability Broker with Tier 0-1 APIs</li>
       <li>AI app generation flow (cloud)</li>
       <li>Permission manifest and audit-log UI</li>

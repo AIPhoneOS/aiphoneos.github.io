@@ -172,7 +172,7 @@
 
   <h2>Detailed Analysis</h2>
 
-  <div class="path-card winner">
+  <div class="path-card">
     <h3>A. Stock Android + Our Launcher App</h3>
     <p class="subtitle" style="margin-bottom:12px">Flash stock Android (or factory reset Pixel 8). Install AIPhoneHome as default launcher. Disable stock apps via ADB. Phone boots to our AI chat.</p>
 
@@ -205,7 +205,7 @@
     </ul>
 
     <div class="verdict">
-      <strong>Verdict:</strong> The fastest path to "talk to phone, get app" with full hardware support. Gets the product in users' hands in days. The "it's just an app" concern is real but irrelevant until you have users who want more. <strong>Start here.</strong>
+      <strong>Verdict:</strong> The fastest path to a working prototype. Full hardware, ship in days. But it's an app pretending to be an OS -- you can't strip Android, can't add system services, can't control the boot sequence. Fine for a demo. Not the product.
     </div>
   </div>
 
@@ -249,7 +249,7 @@
 
   <div class="path-card">
     <h3>C. Full AOSP Build</h3>
-    <p class="subtitle" style="margin-bottom:12px">Download AOSP source (~100GB). Configure for Pixel 8. Build everything from scratch. Full control over every system component.</p>
+    <p class="subtitle" style="margin-bottom:12px">Download AOSP source. Configure for Pixel 8. Strip stock apps. Your WebView runtime is the only visible process. Android framework runs invisibly as the driver layer.</p>
 
     <table>
       <tr><td><strong>Dev speed</strong></td><td>Slowest. Days to set up build env, hours to sync, hours to compile. Steep learning curve for system-level Android.</td></tr>
@@ -280,7 +280,7 @@
     </ul>
 
     <div class="verdict">
-      <strong>Verdict:</strong> The ultimate destination if the product succeeds and you raise money / build a team. Not where a solo founder should start. The risk: you spend 6 months on build infrastructure and never get to the product. <strong>Phase 3+ after you have users.</strong>
+      <strong>Verdict:</strong> The chosen path. See <a href="foundation.html">OS Foundation</a> for why AOSP Minimal is the only option with full Pixel 8 hardware support today. The framework runs invisibly -- the user only sees your AI chat and generated apps. Not as clean as Halium, but Halium doesn't have a Pixel 8 port.
     </div>
   </div>
 
@@ -299,7 +299,7 @@
     <ul>
       <li>No Android bloat at all -- clean Linux system, tiny image</li>
       <li>Standard Linux development -- familiar tools (apt, systemd, bash)</li>
-      <li>Can build the entire UI shell from scratch in web tech (Electron/WebView + custom WM)</li>
+      <li>Can build the entire UI shell from scratch in web tech (WebView + custom window manager)</li>
       <li>Active community (Pine64, Purism Librem 5 users)</li>
       <li>Truly independent from Google -- even the kernel is mainline, not Android's fork</li>
       <li>Much smaller codebase to understand and modify</li>
@@ -345,7 +345,7 @@
       <li><strong>Camera: No.</strong> Tensor G3 ISP drivers are Android-specific. Porting is a multi-month project.</li>
       <li><strong>Bluetooth: No.</strong> Requires Android's Bluetooth HAL or a complete rewrite.</li>
       <li><strong>Cellular: No.</strong> Qualcomm/Samsung baseband requires Android's RIL (Radio Interface Layer).</li>
-      <li><strong>GPU: No.</strong> Mali/Adreno drivers are Android-specific.</li>
+      <li><strong>GPU: No.</strong> Imagination (IMG) GPU drivers on Tensor G3 are Android-specific.</li>
       <li>You're building an entire OS from scratch. This is a 50-person, multi-year project.</li>
       <li>No community to help. You're alone.</li>
     </ul>
@@ -359,18 +359,18 @@
 
   <table>
     <tr><th>When</th><th>Path</th><th>Why</th></tr>
-    <tr><td><strong>Now</strong></td><td>A. Stock Android + Launcher</td><td>Working prototype with full hardware in days. Validate the experience. Iterate fast.</td></tr>
-    <tr><td><strong>When experience is proven</strong></td><td>B. LineageOS + System App</td><td>Graduate to a real custom ROM. Strip stock apps. Add system-level Capability Broker. Still has community hardware support.</td></tr>
-    <tr><td><strong>When you have users + team</strong></td><td>C. Full AOSP Build</td><td>Fork AOSP. Own the entire stack. Build the TWA runtime properly. This is the end-state OS.</td></tr>
+    <tr><td><strong>Now</strong></td><td>C. AOSP Minimal</td><td>The only path with full Pixel 8 hardware support. Strip stock apps, add our WebView runtime. Android framework invisible underneath.</td></tr>
+    <tr><td><strong>If Halium gets ported</strong></td><td>Halium/Droidian</td><td>Migrate to clean Linux + Android drivers via libhybris. Same product, cleaner base.</td></tr>
+    <tr><td><strong>Long term</strong></td><td>postmarketOS / Mainline</td><td>When mainline Linux drivers catch up for Pixel hardware. No Android at all.</td></tr>
   </table>
 
-  <p>Skip D and E entirely. They fail the hardware requirement and add months of work that has nothing to do with your product.</p>
+  <p>Skip A (it's an app, not an OS), skip D and E (hardware doesn't work). See <a href="foundation.html">OS Foundation</a> for the full research.</p>
 
-  <p><strong>The key insight:</strong> Paths A, B, and C all deliver the same user experience -- "talk to phone, get app." The user doesn't know or care whether the Capability Broker is an Android app, a system service, or a custom framework API. They just know their phone creates apps. Start with the path that gets them there fastest.</p>
+  <p><strong>The key insight:</strong> the product architecture (AI chat, Capability Broker, generated web apps) is foundation-agnostic. It runs the same whether the base is AOSP, Halium, or mainline Linux. Build the product on AOSP now, swap the foundation later when better options exist for Pixel 8.</p>
 
   <div class="page-nav">
-    <a href="buildpath.html">&larr; Build Path</a>
-    <a href="decisions.html">Decisions &rarr;</a>
+    <a href="risks.html">&larr; Risks</a>
+    <a href="decisions.html">All Decisions &rarr;</a>
   </div>
 
 </div></div>
