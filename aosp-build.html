@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AOSP Build Research — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>AOSP Build Research</h1>
+  <p class="subtitle">How to actually build a minimal AOSP image for Pixel 8</p>
+
+  <h2>Pixel 8 (shiba) Build Target</h2>
+  <p>Google documents the Pixel 8 AOSP build process. Key facts:</p>
+  <ul>
+    <li><strong>Codename:</strong> shiba</li>
+    <li><strong>Build target:</strong> <code>aosp_shiba-userdebug</code></li>
+    <li><strong>Recommended branch:</strong> <code>android-latest-release</code> (as of March 2025, Google recommends this over <code>aosp-main</code>)</li>
+    <li><strong>Vendor blobs:</strong> Google no longer provides separate vendor blob archives. Proprietary blobs are on the <code>/vendor</code> partition and must be extracted from factory images.</li>
+    <li><strong>Extraction tool:</strong> <a href="https://github.com/AOSPAlliance/android-prepare-vendor" target="_blank" rel="noopener">android-prepare-vendor</a> automates extracting vendor blobs from factory images</li>
+  </ul>
+
+  <h2>Build Process Overview</h2>
+  <pre><code># 1. Sync AOSP source (~100GB, 2-4 hours)
+repo init -u https://android.googlesource.com/platform/manifest \
+  -b android-latest-release --depth=1
+repo sync -c -j$(nproc) --no-tags
+
+# 2. Extract vendor blobs from Pixel 8 factory image
+# Download factory image from developers.google.com/android/images
+# Use android-prepare-vendor to extract
+
+# 3. Set up build environment
+source build/envsetup.sh
+lunch aosp_shiba-userdebug
+
+# 4. Build
+m -j$(nproc)
+
+# 5. Flash to device
+fastboot flashall -w</code></pre>
+
+  <h2>What We Can Strip</h2>
+  <p>AOSP build is configured via <code>PRODUCT_PACKAGES</code> in product makefiles. Removing apps is straightforward:</p>
+  <pre><code># In our device/aiphone/product.mk:
+PRODUCT_PACKAGES += \
+  -Launcher3 \
+  -Launcher3QuickStep \
+  -Calendar \
+  -Calculator \
+  -Camera2 \
+  -Contacts \
+  -DeskClock \
+  -Email \
+  -Gallery2 \
+  -Music \
+  -QuickSearchBox
+
+# Add our system app
+PRODUCT_PACKAGES += \
+  AIPhoneHome</code></pre>
+
+  <h2>What We CANNOT Easily Strip</h2>
+  <ul>
+    <li><strong>Android Framework (frameworks/base):</strong> Monolithic. SurfaceFlinger, WindowManager, ActivityManager, PackageManager are all interdependent. Removing one breaks others.</li>
+    <li><strong>SystemUI:</strong> Handles status bar, navigation, volume, power menu, incoming calls. We need to KEEP this as a safety net but can customize it.</li>
+    <li><strong>ART runtime:</strong> System services are written in Java and run on ART. Can't remove ART without rewriting system services in native code.</li>
+    <li><strong>Zygote:</strong> The process that spawns all Android apps, including system services. Required.</li>
+  </ul>
+
+  <h2>Practical "Minimal" AOSP</h2>
+  <p>The realistic minimum is:</p>
+  <ul>
+    <li>Full AOSP system with all framework components (they're required)</li>
+    <li>All stock apps removed via PRODUCT_PACKAGES exclusions</li>
+    <li>Our AIPhoneHome added as a privileged system app</li>
+    <li>AIPhoneHome registered as the default HOME activity</li>
+    <li>SystemUI retained for critical system events</li>
+    <li>Result: phone boots to our AI chat, Android framework runs invisibly</li>
+  </ul>
+
+  <h2>How GrapheneOS Does It</h2>
+  <p>GrapheneOS is the best example of a stripped AOSP build:</p>
+  <ul>
+    <li>Removes all Google apps and services</li>
+    <li>Keeps the full Android framework (required for system services)</li>
+    <li>Adds hardened memory allocator, network permissions, sensor permissions</li>
+    <li>Sandboxed Google Play compatibility layer (optional, runs as unprivileged app)</li>
+    <li>Supports Pixel 4 through Pixel 9 series</li>
+    <li>Published <a href="https://grapheneos.org/build" target="_blank" rel="noopener">detailed build documentation</a></li>
+  </ul>
+  <p><strong>Key lesson:</strong> GrapheneOS proves that a solo-ish team can maintain a custom AOSP build for Pixel devices. They've been doing it for years. We can learn from their build process.</p>
+
+  <h2>Android Kiosk / Device Owner Mode</h2>
+  <p>Android has built-in support for locking a device to a single app:</p>
+  <ul>
+    <li><strong>Lock Task Mode:</strong> Pins the device to one app. No home button, no recents, no notifications (unless allowlisted).</li>
+    <li><strong>Device Owner Mode:</strong> Full device management. Can set kiosk policies, allowlist apps, control updates.</li>
+    <li><strong>Setup:</strong> <code>DevicePolicyManager.setLockTaskPackages()</code> to allowlist our app, then <code>Activity.startLockTask()</code></li>
+    <li><strong>Since Android 9:</strong> Can start any activity in lock task mode via <code>ActivityOptions.setLockTaskEnabled()</code></li>
+  </ul>
+  <p>This is useful for Phase 1: before we build a full AOSP image, we can use kiosk mode on stock Android to simulate the "boot to our UI" experience for testing.</p>
+
+  <h2>Build Environment</h2>
+  <ul>
+    <li><strong>OS:</strong> Linux required (Ubuntu 22.04 recommended). macOS not supported. Use Docker.</li>
+    <li><strong>RAM:</strong> 16GB minimum, 32GB recommended. We have 64GB.</li>
+    <li><strong>Disk:</strong> 300GB+ needed. We have 1TB free.</li>
+    <li><strong>CPU:</strong> More cores = faster build. x86_64 required.</li>
+    <li><strong>Java:</strong> JDK 17 required. We have it.</li>
+    <li><strong>Docker image:</strong> Already created at <code>build/Dockerfile</code></li>
+  </ul>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://source.android.com/docs/setup/build/building" target="_blank" rel="noopener">Build Android from Source (AOSP)</a></li>
+    <li><a href="https://source.android.com/docs/core/architecture/16kb-page-size/build-flash-pixel8-16kb" target="_blank" rel="noopener">Build and Flash Pixel 8</a></li>
+    <li><a href="https://github.com/AOSPAlliance/android-prepare-vendor" target="_blank" rel="noopener">android-prepare-vendor (vendor blob extraction)</a></li>
+    <li><a href="https://grapheneos.org/build" target="_blank" rel="noopener">GrapheneOS Build Documentation</a></li>
+    <li><a href="https://developer.android.com/work/dpc/dedicated-devices/lock-task-mode" target="_blank" rel="noopener">Android Lock Task Mode (Kiosk)</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="foundation.html">&larr; OS Foundation</a>
+    <a href="twa.html">Trusted Web Apps &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>On-Device AI Research — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>On-Device AI Research</h1>
+  <p class="subtitle">What can actually run on a Pixel 8 without cloud?</p>
+
+  <h2>Gemini Nano on Pixel 8</h2>
+  <p>Google ships Gemini Nano on Pixel 8, but with significant limitations:</p>
+  <ul>
+    <li><strong>Model size:</strong> 1.8B-3.25B parameters, 4-bit quantized</li>
+    <li><strong>Input:</strong> Text only (no images, no audio) on Pixel 8. Pixel 9+ gets multimodal.</li>
+    <li><strong>Capabilities:</strong> Smart replies in messaging, audio transcript summaries (max ~15 min)</li>
+    <li><strong>Not enabled by default</strong> on Pixel 8 (hidden in AI Core settings)</li>
+    <li><strong>Works offline</strong> -- no data sent to Google servers</li>
+    <li><strong>Access:</strong> Through Android AICore system service. Requires GMS (which we don't use).</li>
+  </ul>
+
+  <h3>What this means for us</h3>
+  <p>We can't use Gemini Nano because it requires Google Mobile Services. But the Tensor G3 chip in Pixel 8 has a TPU (Tensor Processing Unit) that CAN run other models. Our options for local inference:</p>
+
+  <table>
+    <tr><th>Runtime</th><th>What it runs</th><th>Pixel 8 support</th><th>Our use case</th></tr>
+    <tr><td><strong>llama.cpp</strong></td><td>GGUF-quantized LLMs</td><td style="color:var(--green)">Yes (CPU + NEON)</td><td>Intent routing, simple classification</td></tr>
+    <tr><td><strong>ONNX Runtime</strong></td><td>ONNX models</td><td style="color:var(--green)">Yes (CPU, NNAPI)</td><td>Embeddings, small classifiers</td></tr>
+    <tr><td><strong>MediaPipe</strong></td><td>Google's ML tasks</td><td style="color:var(--green)">Yes</td><td>Object detection, hand tracking</td></tr>
+    <tr><td><strong>WebGPU (in Chromium)</strong></td><td>GPU-accelerated inference</td><td style="color:var(--yellow)">Partial (Chrome 121+, Android 12+)</td><td>In-browser model inference</td></tr>
+    <tr><td><strong>Tensor G3 TPU via NNAPI</strong></td><td>Delegated inference</td><td style="color:var(--yellow)">Limited public API</td><td>Hardware-accelerated inference</td></tr>
+  </table>
+
+  <h3>Practical plan</h3>
+  <ul>
+    <li><strong>Phase 1-2:</strong> Cloud only (Claude API). No local inference. Simple and reliable.</li>
+    <li><strong>Phase 3:</strong> Add llama.cpp with a small model (Phi-3-mini or similar, ~2B params) for offline intent routing: "is the user asking to create an app, modify an app, or ask a question?"</li>
+    <li><strong>Phase 4+:</strong> Evaluate WebGPU inference for in-app AI queries, ONNX for embeddings/search.</li>
+  </ul>
+
+  <h2>Apple's Foundation Models</h2>
+  <p>Apple opened on-device models to developers via the Foundation Models framework at WWDC 2025. Runs on Apple Silicon with Neural Engine. Supports text generation, entity extraction, and classification.</p>
+  <p><strong>Relevance:</strong> Validates that on-device LLMs are becoming a platform feature. Both Google and Apple ship them. Our differentiator isn't having local AI -- it's using AI to CREATE apps, not just assist in existing ones.</p>
+
+  <h2>WebView Performance Reality</h2>
+  <p>Research and benchmarks on WebView vs native performance:</p>
+  <ul>
+    <li><strong>For most apps (lists, forms, data display):</strong> Performance difference is negligible. Users can't tell.</li>
+    <li><strong>For complex animations/games:</strong> Native has an advantage. WebGL/WebGPU narrows the gap.</li>
+    <li><strong>JavaScript execution:</strong> Chrome is significantly faster than Android WebView for some metrics. We use Chromium Content Shell which matches Chrome performance.</li>
+    <li><strong>Android WebView fragmentation:</strong> 14+ OS versions, 30+ WebView versions in the wild. We control both, so this doesn't apply.</li>
+    <li><strong>Energy consumption:</strong> Research shows JavaScript can match or beat Java for many workloads in energy efficiency.</li>
+  </ul>
+  <p><strong>Bottom line:</strong> For the kinds of apps AI generates (trackers, dashboards, forms, tools), WebView performance is not a problem. For 3D games or AR, native wins -- but those aren't our use case.</p>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://store.google.com/intl/en/ideas/articles/gemini-nano-offline/" target="_blank" rel="noopener">Gemini Nano Multimodal Capabilities on Pixel</a></li>
+    <li><a href="https://localaimaster.com/blog/gemini-nano-android-guide" target="_blank" rel="noopener">Gemini Nano Android: On-Device AI Guide (2026)</a></li>
+    <li><a href="https://www.androidauthority.com/gemini-nano-features-devices-3490062/" target="_blank" rel="noopener">Gemini Nano features and supported devices</a></li>
+    <li><a href="https://developer.apple.com/documentation/FoundationModels" target="_blank" rel="noopener">Apple Foundation Models</a></li>
+    <li><a href="https://arxiv.org/pdf/2308.16734" target="_blank" rel="noopener">Native vs Web Apps: Energy Consumption comparison</a></li>
+    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="generation.html">&larr; App Generation</a>
+    <a href="security.html">Security &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

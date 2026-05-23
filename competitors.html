@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI App Generators — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Existing AI App Generators</h1>
+  <p class="subtitle">What already does "describe app, get app" -- and what they get wrong</p>
+
+  <p>"Describe an app, get an app" is not a new idea. Multiple products already do this on the web. The question is: why does the world need another one, and why does it need to be an OS?</p>
+
+  <h2>The Landscape (May 2026)</h2>
+  <table>
+    <tr><th>Product</th><th>What it does</th><th>Model</th><th>Output</th><th>Hardware access</th></tr>
+    <tr><td><strong>Bolt.new</strong></td><td>Browser-based full-stack prototyping</td><td>Claude Sonnet / GPT-4</td><td>React/Next.js apps</td><td style="color:var(--red)">None</td></tr>
+    <tr><td><strong>Lovable</strong></td><td>AI app builder with built-in DB</td><td>Proprietary</td><td>React + Supabase</td><td style="color:var(--red)">None</td></tr>
+    <tr><td><strong>v0 (Vercel)</strong></td><td>UI component generation</td><td>Proprietary</td><td>Next.js components</td><td style="color:var(--red)">None</td></tr>
+    <tr><td><strong>Replit Agent</strong></td><td>Autonomous full-stack dev</td><td>Fine-tuned models</td><td>Any framework + DB + deploy</td><td style="color:var(--red)">None</td></tr>
+    <tr><td><strong>Claude Artifacts</strong></td><td>Generate single-page apps inline</td><td>Claude</td><td>HTML/CSS/JS</td><td style="color:var(--red)">None</td></tr>
+    <tr><td><strong>AIPhone OS</strong></td><td>Generate apps that run as OS citizens</td><td>Claude (pluggable)</td><td>Plain HTML/CSS/JS (TWA)</td><td style="color:var(--green)">Full: camera, BLE, NFC, GPS, filesystem, telephony</td></tr>
+  </table>
+
+  <h2>What They All Get Wrong</h2>
+
+  <h3>1. They generate web apps that live in a browser tab</h3>
+  <p>Every existing AI app generator produces a web app that runs in a browser. It can't access your camera without a permission popup. It can't scan Bluetooth devices. It can't read your contacts or calendar. It can't send an SMS. It can't run in the background. It's a website, not an app.</p>
+
+  <h3>2. They require a development environment</h3>
+  <p>Bolt.new, Replit, and v0 are designed for developers. They output React, Next.js, or framework-heavy code that requires npm, a build step, and deployment configuration. A non-technical user cannot use these tools to get a working app on their phone.</p>
+
+  <h3>3. They don't install on your device</h3>
+  <p>The generated app lives on someone else's server. If Bolt.new goes down, your app goes down. If you stop paying Replit, your app disappears. None of these tools produce something that's installed locally on your device, works offline, and belongs to you.</p>
+
+  <h3>4. They lock you into frameworks</h3>
+  <p>v0 locks you into Next.js. Lovable locks you into React + Supabase. Replit uses proprietary deployment. The generated code is framework-heavy and hard to understand or modify manually.</p>
+
+  <h2>How AIPhone OS Is Different</h2>
+  <table>
+    <tr><th>Dimension</th><th>Existing generators</th><th>AIPhone OS</th></tr>
+    <tr><td>Where apps run</td><td>Browser tab / cloud server</td><td>Installed on your phone as a first-class app</td></tr>
+    <tr><td>Hardware access</td><td>None (browser sandbox)</td><td>Camera, BLE, NFC, GPS, filesystem, contacts, telephony</td></tr>
+    <tr><td>Offline</td><td>No (requires server)</td><td>Yes (Service Workers, local storage)</td></tr>
+    <tr><td>Ownership</td><td>Hosted on their servers</td><td>On your device, exportable, deletable</td></tr>
+    <tr><td>Output format</td><td>React/Next.js (framework-heavy)</td><td>Plain HTML/CSS/JS (zero frameworks)</td></tr>
+    <tr><td>Target user</td><td>Developers</td><td>Anyone with a phone</td></tr>
+    <tr><td>Modification</td><td>Edit code in IDE</td><td>"Change this app" in natural language</td></tr>
+    <tr><td>Security</td><td>Full server access</td><td>Sandboxed, permissioned, audited</td></tr>
+  </table>
+
+  <h2>The Real Differentiator</h2>
+  <p>Bolt.new and friends prove that AI can generate functional web apps. That's validated. The open question is NOT "can AI build apps?" It's "can AI-built apps replace your phone's app store?"</p>
+  <p>That requires: hardware access, offline operation, local data ownership, installation as first-class apps, and a trust/permission model. No existing product does any of these. That's why this needs to be an OS.</p>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://getmocha.com/blog/best-ai-app-builder-2026" target="_blank" rel="noopener">Best AI App Builder 2026: Lovable vs Bolt vs v0 vs Mocha</a></li>
+    <li><a href="https://whichaiisbest.com/best-ai-app-builder/" target="_blank" rel="noopener">Best AI App Builder 2026: Lovable vs Bolt vs v0 vs Replit</a></li>
+    <li><a href="https://replit.com/discover/replit-vs-bolt" target="_blank" rel="noopener">Replit vs Bolt comparison</a></li>
+    <li><a href="https://www.dyad.sh/blog/free-ai-app-builders-compared" target="_blank" rel="noopener">Free AI App Builders Compared (2026)</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="comparison.html">&larr; vs iOS / Android</a>
+    <a href="why-linux.html">Why Linux &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

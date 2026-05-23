@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Legal & Regulatory — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Legal & Regulatory</h1>
+  <p class="subtitle">Liability, naming, patents, and emergency calling</p>
+
+  <h2>AI-Generated Code Liability</h2>
+  <p>If a generated app leaks user data, crashes and loses information, or behaves maliciously, who is liable?</p>
+
+  <h3>Current legal landscape (2026)</h3>
+  <ul>
+    <li><strong>Courts will not accept "the AI did it" as a defense.</strong> Liability remains with the organization that deployed the code.</li>
+    <li><strong>As the OS that generates and runs the code, we bear responsibility</strong> for the security model that contains it.</li>
+    <li><strong>AI-generated code is not copyrightable</strong> in the US (no human authorship). Users own their data, not the generated code itself.</li>
+    <li><strong>Due diligence matters:</strong> demonstrating that we sandbox, audit, and permission-gate generated code is our legal defense. "We ran static analysis, sandboxed the app, and required user approval for each capability" is a strong position.</li>
+  </ul>
+
+  <h3>Our mitigations</h3>
+  <ul>
+    <li>Generated code is always treated as untrusted (see <a href="security.html">Security Model</a>)</li>
+    <li>9-layer defense model: sandbox, broker, static analysis, CSP, network policy, permissions, audit, rollback, data sovereignty</li>
+    <li>User explicitly approves each capability before the app gets access</li>
+    <li>Full audit trail of every privileged action</li>
+    <li>Terms of service: generated apps are provided as-is, user accepts responsibility for what they ask the AI to build</li>
+  </ul>
+
+  <h2>Naming: "AIPhone"</h2>
+  <p><strong>Status: High risk. Requires professional trademark clearance before any public use.</strong></p>
+  <ul>
+    <li>"AIPhone" is phonetically and visually similar to "iPhone" (Apple's trademark)</li>
+    <li>Apple aggressively defends the "i" prefix and "Phone" suffix in their trademark portfolio</li>
+    <li>Even if legally distinct, consumer confusion is likely -- courts use a "likelihood of confusion" standard</li>
+    <li>The domain aiphone.online may also face challenges</li>
+    <li>Alternative names discussed: AetherOS, AIreOS, LLMware -- all require clearance</li>
+  </ul>
+  <p><strong>Action required:</strong> Engage a trademark attorney before any public launch, marketing, or investor materials.</p>
+
+  <h2>Patent Landscape</h2>
+  <p>Areas where patents may exist (requires professional patent search):</p>
+  <ul>
+    <li><strong>AI-generated applications:</strong> Microsoft, Google, and others have filed patents related to AI code generation</li>
+    <li><strong>Web-based OS app model:</strong> Mozilla (Firefox OS), Google (ChromeOS/ARC), and others have prior art</li>
+    <li><strong>Capability broker / permission systems:</strong> Android's permission model, iOS's entitlements, and WebKit's feature policy are prior art that may be patented</li>
+    <li><strong>On-device AI inference:</strong> Google (Gemini Nano / AICore), Apple (Core ML / Neural Engine), Qualcomm (AI Engine) all have patents</li>
+  </ul>
+  <p><strong>Action required:</strong> Professional patent search before Phase 4 (public developer release). Prior art may be sufficient defense, but needs expert review.</p>
+
+  <h2>Emergency Calling Regulations</h2>
+  <p>If the OS is sold as a phone (not just a developer device), emergency calling requirements apply:</p>
+  <ul>
+    <li><strong>US (FCC):</strong> All phones sold must support 911 calling, including location services (E911)</li>
+    <li><strong>EU:</strong> 112 emergency calling required</li>
+    <li><strong>Australia:</strong> 000 emergency calling required, plus 112 (GSM standard)</li>
+    <li><strong>These are non-negotiable for commercial phone sales</strong></li>
+  </ul>
+
+  <h3>Our position</h3>
+  <ul>
+    <li><strong>Phase 1-3:</strong> Developer/enthusiast device. Self-flashed. No commercial sale. Emergency calling works via AOSP telephony stack (unchanged).</li>
+    <li><strong>Phase 5 (commercialization):</strong> Must verify emergency calling works correctly before any commercial distribution. Requires carrier testing.</li>
+    <li><strong>Key risk:</strong> If our custom UI replaces the dialer, emergency calling must still work when the UI crashes or freezes. AOSP handles this at the system level, but we must not break it.</li>
+  </ul>
+
+  <h2>Open Source Licensing</h2>
+  <ul>
+    <li><strong>AOSP:</strong> Apache 2.0 license -- we can build proprietary products on top</li>
+    <li><strong>Linux kernel:</strong> GPLv2 -- kernel modifications must be open-sourced. Our code runs in userspace, not kernel, so this doesn't apply to our product code.</li>
+    <li><strong>Chromium:</strong> BSD license -- we can modify and distribute freely</li>
+    <li><strong>Our product code:</strong> License TBD. Could be open source (build community) or proprietary (protect IP).</li>
+  </ul>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://medium.com/@keneade/your-ai-is-writing-code-no-one-understands-and-thats-becoming-a-legal-problem-e1d6aa6b174f" target="_blank" rel="noopener">AI-generated code legal liability (2026)</a></li>
+    <li><a href="https://www.mbhb.com/intelligence/snippets/navigating-the-legal-landscape-of-ai-generated-code-ownership-and-liability-challenges/" target="_blank" rel="noopener">AI code ownership and liability challenges</a></li>
+    <li><a href="https://eurekasoft.com/blog/aigenerated-code-and-copyright-who-owns-aiwritten-software" target="_blank" rel="noopener">AI-generated code and copyright</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="risks.html">&larr; Risks</a>
+    <a href="os-paths.html">OS Build Paths &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

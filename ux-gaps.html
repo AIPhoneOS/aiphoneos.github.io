@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>UX Open Questions — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>UX Open Questions</h1>
+  <p class="subtitle">Design problems we haven't solved yet</p>
+
+  <p>We have architecture, security, and capability specs. We have zero visual designs. These are the UX problems that need answers before Phase 2.</p>
+
+  <h2>Home Screen</h2>
+  <ul>
+    <li>What does the user see when they unlock the phone?</li>
+    <li>Is it a chat interface? A dashboard? A hybrid?</li>
+    <li>How do pinned apps appear? Grid? List? Cards?</li>
+    <li>Where is the text input vs voice input?</li>
+    <li>What happens when there are zero apps (first boot)?</li>
+    <li>How does it adapt between phone (portrait) and tablet (landscape)?</li>
+  </ul>
+
+  <h2>Voice Interaction</h2>
+  <p>The product is "talk to your phone, get app." But we haven't designed the voice UX:</p>
+  <ul>
+    <li><strong>Activation:</strong> Always listening? Wake word? Push-to-talk button? Hardware button?</li>
+    <li><strong>Feedback:</strong> How does the user know the phone is listening? Visual indicator? Sound?</li>
+    <li><strong>Transcription display:</strong> Show real-time transcription? Or just show the response?</li>
+    <li><strong>Noise handling:</strong> What happens in a noisy environment?</li>
+    <li><strong>Privacy:</strong> If always listening, how do users trust that audio isn't being recorded/sent?</li>
+  </ul>
+
+  <h2>App Generation UX</h2>
+  <ul>
+    <li>What does the user see while the app is being generated? (Loading spinner? Progress? Preview?)</li>
+    <li>How long is acceptable? 5 seconds? 15? 30?</li>
+    <li>What if the AI needs to ask a clarifying question? How is that presented?</li>
+    <li>How does the permission approval flow look? (iOS-style popup? Full-screen card? Inline in chat?)</li>
+    <li>What does "edit this app" look like? Does the user see the app and chat side-by-side?</li>
+  </ul>
+
+  <h2>Incoming Calls & System Events</h2>
+  <p>If our WebView is the entire UI, what happens when:</p>
+  <ul>
+    <li><strong>Phone call comes in:</strong> Who renders the incoming call screen? Our TWA dialer? AOSP's built-in call UI? What if the WebView has crashed?</li>
+    <li><strong>Alarm goes off:</strong> How does it interrupt the current app?</li>
+    <li><strong>Low battery warning:</strong> Who shows the notification?</li>
+    <li><strong>System update:</strong> How is the user notified?</li>
+    <li><strong>Crash recovery:</strong> If the home WebView crashes, what does the user see? How do they get back?</li>
+  </ul>
+  <p><strong>Likely answer:</strong> Keep AOSP's SystemUI for critical system events (calls, alarms, battery, crash recovery). Our TWA handles everything else. This means SystemUI is NOT stripped -- it's the safety net.</p>
+
+  <h2>Notifications</h2>
+  <ul>
+    <li>Do we use Android's notification shade or build our own?</li>
+    <li>How do notifications from generated apps appear?</li>
+    <li>Status bar: do we show Android's status bar or replace it with our own?</li>
+    <li>Lock screen: what notifications show on the lock screen?</li>
+  </ul>
+
+  <h2>Multi-App Switching</h2>
+  <ul>
+    <li>User has 5 generated apps. How do they switch between them?</li>
+    <li>Swipe gesture? Button? Chat command ("go back to my tracker")?</li>
+    <li>Do apps run in the background or are they killed when not visible?</li>
+    <li>Is there a recents view? What does it look like?</li>
+  </ul>
+
+  <h2>Accessibility</h2>
+  <ul>
+    <li>How does a blind user interact with an AI-first phone? Screen reader support for generated apps?</li>
+    <li>Motor impairment: are all UI elements reachable with switch access?</li>
+    <li>Generated apps must produce accessible HTML -- how do we enforce this in the AI prompt?</li>
+    <li>Can the AI be instructed to generate apps optimized for specific accessibility needs?</li>
+    <li>Voice-first interaction is naturally accessible -- this could be an advantage</li>
+  </ul>
+
+  <h2>Internationalization</h2>
+  <ul>
+    <li>The AI chat needs to work in any language (Claude supports 100+ languages)</li>
+    <li>Generated app UI text -- does the AI generate in the user's language automatically?</li>
+    <li>RTL language support (Arabic, Hebrew)</li>
+    <li>System UI text: hardcoded English or localized?</li>
+  </ul>
+
+  <h2>Priority for Phase 1</h2>
+  <p>Not everything needs to be solved now. Minimum viable UX for Phase 1 (emulator):</p>
+  <ol>
+    <li>Home screen: full-screen chat, text input, generated app cards</li>
+    <li>App view: full-screen WebView with back button</li>
+    <li>Keep AOSP SystemUI for calls, alarms, battery, status bar</li>
+    <li>No voice yet (text only)</li>
+    <li>No multi-app switching (one app at a time)</li>
+    <li>English only</li>
+  </ol>
+
+  <div class="page-nav">
+    <a href="lifecycle.html">&larr; App Lifecycle</a>
+    <a href="ai.html">AI Architecture &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
