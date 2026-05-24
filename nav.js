@@ -15,6 +15,7 @@ const NAV = [
     { title: 'Runtime (V8/Chromium)', href: 'runtime.html' },
     { title: 'Why No Native Apps', href: 'no-native-apps.html' },
     { title: 'OS Foundation', href: 'foundation.html' },
+    { title: 'GrapheneOS Base', href: 'grapheneos.html' },
     { title: 'AOSP Build Research', href: 'aosp-build.html' },
     { title: 'All Decisions', href: 'decisions.html' },
   ]},

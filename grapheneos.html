@@ -1,0 +1,301 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GrapheneOS Base — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.gos-diagram { margin: 20px 0; }
+.gos-row { display: flex; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
+.gos-box {
+  flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 8px;
+  font-size: 12px; line-height: 1.4; border: 1px solid;
+}
+.gos-box strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.gos-box small { opacity: 0.7; }
+
+.gos-header {
+  padding: 8px 14px; border-radius: 8px 8px 0 0; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+}
+.gos-section {
+  border: 1px solid var(--border); border-radius: 8px; margin: 12px 0;
+  overflow: hidden;
+}
+.gos-body { padding: 10px; }
+
+/* Colors */
+.c-gos { background: #30d15815; border-color: var(--green); color: var(--green); }
+.c-gos-h { background: var(--green); color: #000; }
+.c-aosp { background: #ff950015; border-color: #ff9500; color: #ff9500; }
+.c-aosp-h { background: #ff9500; color: #fff; }
+.c-ours { background: #0a84ff15; border-color: var(--accent); color: var(--accent); }
+.c-ours-h { background: var(--accent); color: #fff; }
+.c-removed { background: #ff453a08; border-color: #ff453a44; color: var(--text-2); opacity: 0.5; }
+.c-vendor { background: #ffd60a15; border-color: var(--yellow); color: var(--yellow); }
+.c-vendor-h { background: var(--yellow); color: #000; }
+
+.vs-table td:first-child { font-weight: 600; white-space: nowrap; }
+.arrow { text-align: center; color: var(--text-2); font-size: 16px; margin: 4px 0; }
+
+.repo-tree { font-family: var(--mono); font-size: 12px; line-height: 1.8; }
+.repo-tree .dir { color: var(--accent); }
+.repo-tree .gos { color: var(--green); }
+.repo-tree .rm { color: var(--red); opacity: 0.5; }
+.repo-tree .us { color: var(--accent); font-weight: 600; }
+.repo-tree .note { color: var(--text-2); font-style: italic; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>GrapheneOS — Our Base Distribution</h1>
+  <p class="subtitle">What it is, what it ships, how we build on top of it</p>
+
+  <h2>What Is GrapheneOS</h2>
+  <p>GrapheneOS is an independent, privacy-focused mobile OS based on AOSP. It targets Pixel phones exclusively. Key facts:</p>
+  <ul>
+    <li>Maintained by a small team led by Daniel Micay since 2014 (originally CopperheadOS)</li>
+    <li>Supports Pixel 4 through Pixel 9 series</li>
+    <li>Ships without Google apps or services</li>
+    <li>Adds significant security hardening on top of AOSP</li>
+    <li>Monthly security patches merged from AOSP</li>
+    <li>Used by journalists, activists, security professionals</li>
+  </ul>
+
+  <h2>GrapheneOS vs Stock Android vs AOSP</h2>
+  <table class="vs-table">
+    <tr><th></th><th>Stock Android (Pixel)</th><th>AOSP (bare)</th><th>GrapheneOS</th></tr>
+    <tr><td>Google apps</td><td style="color:var(--green)">All included</td><td style="color:var(--red)">None</td><td style="color:var(--red)">None</td></tr>
+    <tr><td>Play Services</td><td style="color:var(--green)">Built in</td><td style="color:var(--red)">None</td><td style="color:var(--yellow)">Optional sandboxed</td></tr>
+    <tr><td>Browser</td><td>Chrome</td><td>AOSP Browser</td><td>Vanadium (hardened Chromium)</td></tr>
+    <tr><td>Security patches</td><td>Monthly from Google</td><td>When you merge</td><td>Monthly, fast</td></tr>
+    <tr><td>Memory safety</td><td>Standard</td><td>Standard</td><td>Hardened allocator, MTE</td></tr>
+    <tr><td>Network perms</td><td>No per-app control</td><td>No per-app control</td><td>Per-app network toggle</td></tr>
+    <tr><td>Sensor perms</td><td>Limited</td><td>Limited</td><td>Per-app sensor toggle</td></tr>
+    <tr><td>Verified boot</td><td>Google keys</td><td>Test keys</td><td>Own keys + attestation</td></tr>
+    <tr><td>Pixel 8 support</td><td style="color:var(--green)">Full</td><td style="color:var(--green)">Full (with blobs)</td><td style="color:var(--green)">Full</td></tr>
+    <tr><td>OTA updates</td><td>Google servers</td><td>Manual</td><td>Own update server</td></tr>
+  </table>
+
+  <h2>What GrapheneOS Ships</h2>
+
+  <div class="gos-diagram">
+
+    <div class="gos-section">
+      <div class="gos-header c-gos-h">GrapheneOS Additions (on top of AOSP)</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-gos"><strong>Vanadium</strong>Hardened Chromium browser.<br>Our TWA runtime engine.</div>
+          <div class="gos-box c-gos"><strong>Hardened Allocator</strong>hardened_malloc — custom memory allocator. Mitigates heap exploitation.</div>
+          <div class="gos-box c-gos"><strong>Sandboxed Play</strong>Optional Google Play compatibility. Runs as unprivileged app, not system.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-gos"><strong>Network Permission</strong>Per-app toggle to revoke internet access entirely.</div>
+          <div class="gos-box c-gos"><strong>Sensor Permission</strong>Per-app toggle for accelerometer, gyroscope, etc.</div>
+          <div class="gos-box c-gos"><strong>Camera Privacy</strong>GrapheneOS camera app with privacy indicators.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-gos"><strong>Seedvault Backup</strong>Encrypted backup to USB/cloud.</div>
+          <div class="gos-box c-gos"><strong>Auditor</strong>Hardware-based device integrity verification.</div>
+          <div class="gos-box c-gos"><strong>PDF Viewer</strong>Sandboxed PDF rendering.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-gos"><strong>Exec Spawning</strong>Optional replacement for Zygote forking. Better isolation.</div>
+          <div class="gos-box c-gos"><strong>Hardened Kernel</strong>Kernel patches: MTE, CFI, PAC, ASLR improvements.</div>
+          <div class="gos-box c-gos"><strong>App Store</strong>GrapheneOS app repository client.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&plus;</div>
+
+    <div class="gos-section">
+      <div class="gos-header c-aosp-h">AOSP Base (what GrapheneOS inherits)</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-aosp"><strong>Android Framework</strong>ActivityManager, WindowManager, PackageManager, etc.</div>
+          <div class="gos-box c-aosp"><strong>System UI</strong>Status bar, navigation, volume, power menu.</div>
+          <div class="gos-box c-aosp"><strong>ART Runtime</strong>Java/Kotlin VM for system services.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-aosp"><strong>System Apps</strong>Dialer, Messaging, Contacts, Settings, Camera, Clock, Calculator, Files, Calendar.</div>
+          <div class="gos-box c-aosp"><strong>WebView</strong>System WebView (replaced by Vanadium in GrapheneOS).</div>
+          <div class="gos-box c-aosp"><strong>Native Libs</strong>SurfaceFlinger, AudioFlinger, Skia, SQLite, Bionic libc, BoringSSL.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-aosp"><strong>SELinux Policies</strong>Mandatory access control rules.</div>
+          <div class="gos-box c-aosp"><strong>Init / Zygote</strong>Boot sequence, process spawning.</div>
+          <div class="gos-box c-aosp"><strong>OTA System</strong>A/B partition updates, recovery.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&plus;</div>
+
+    <div class="gos-section">
+      <div class="gos-header c-vendor-h">Vendor / Device Layer (Pixel 8 specific)</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-vendor"><strong>Pixel 8 Device Tree</strong><small>device/google/shusky</small><br>Board config, partitions, boot.</div>
+          <div class="gos-box c-vendor"><strong>Vendor Blobs</strong><small>/vendor partition</small><br>Proprietary drivers from Google.</div>
+          <div class="gos-box c-vendor"><strong>Kernel</strong><small>kernel/google/gs201</small><br>Tensor G3 kernel + GKI modules.</div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-vendor"><strong>HALs</strong>Camera, Audio, BLE, WiFi, GPU, NFC, GPS, Power, Telephony, Sensors, USB, Fingerprint.</div>
+          <div class="gos-box c-vendor"><strong>Firmware</strong>Baseband modem, Titan M2 security chip, display controller, touch controller.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>How We Layer On Top</h2>
+
+  <div class="gos-diagram">
+    <div class="gos-section">
+      <div class="gos-header c-ours-h">AIPhone OS Overlay</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-ours"><strong>AIPhoneHome</strong>Replaces stock launcher. Single fullscreen WebView. AI chat interface. Plain HTML/JS.</div>
+          <div class="gos-box c-ours"><strong>Capability Broker</strong>Java service bridging WebView JS to Android APIs. Permission enforcement + audit log.</div>
+          <div class="gos-box c-ours"><strong>AI Service</strong>Claude API integration. App generation pipeline. Intent routing.</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-2);margin:8px 0 0">These 3 components are our entire codebase. Everything else is GrapheneOS.</p>
+      </div>
+    </div>
+
+    <div class="arrow">&darr; replaces / hides</div>
+
+    <div class="gos-section">
+      <div class="gos-header" style="background:var(--surface-2);color:var(--text)">What We Change in GrapheneOS</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-removed"><strong>Launcher3</strong><small>REPLACED by AIPhoneHome</small></div>
+          <div class="gos-box c-removed"><strong>Calculator</strong><small>REMOVED — AI generates</small></div>
+          <div class="gos-box c-removed"><strong>Calendar</strong><small>REMOVED — AI generates</small></div>
+          <div class="gos-box c-removed"><strong>Clock</strong><small>REMOVED — AI generates</small></div>
+          <div class="gos-box c-removed"><strong>Gallery</strong><small>REMOVED — AI generates</small></div>
+          <div class="gos-box c-removed"><strong>Files</strong><small>REMOVED — Broker handles</small></div>
+          <div class="gos-box c-removed"><strong>PDF Viewer</strong><small>REMOVED</small></div>
+          <div class="gos-box c-removed"><strong>Auditor</strong><small>REMOVED</small></div>
+          <div class="gos-box c-removed"><strong>Seedvault</strong><small>REMOVED</small></div>
+          <div class="gos-box c-removed"><strong>GOS App Store</strong><small>REMOVED</small></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrow">&darr; keep as-is</div>
+
+    <div class="gos-section">
+      <div class="gos-header" style="background:var(--green);color:#000">What We Keep From GrapheneOS</div>
+      <div class="gos-body">
+        <div class="gos-row">
+          <div class="gos-box c-gos"><strong>Vanadium</strong><small>IS our web runtime</small></div>
+          <div class="gos-box c-gos"><strong>Hardened Allocator</strong><small>Security — free</small></div>
+          <div class="gos-box c-gos"><strong>Hardened Kernel</strong><small>MTE, CFI, PAC</small></div>
+          <div class="gos-box c-gos"><strong>Network Perms</strong><small>Per-app network</small></div>
+          <div class="gos-box c-gos"><strong>Sensor Perms</strong><small>Per-app sensors</small></div>
+          <div class="gos-box c-gos"><strong>Exec Spawning</strong><small>Better isolation</small></div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-aosp"><strong>Dialer</strong><small>Phone calls</small></div>
+          <div class="gos-box c-aosp"><strong>Messaging</strong><small>SMS</small></div>
+          <div class="gos-box c-aosp"><strong>Camera</strong><small>Photo/video</small></div>
+          <div class="gos-box c-aosp"><strong>Contacts</strong><small>Address book</small></div>
+          <div class="gos-box c-aosp"><strong>Settings</strong><small>System config</small></div>
+          <div class="gos-box c-aosp"><strong>System UI</strong><small>Status bar, nav</small></div>
+        </div>
+        <div class="gos-row">
+          <div class="gos-box c-aosp"><strong>Full Framework</strong><small>All managers, invisible</small></div>
+          <div class="gos-box c-aosp"><strong>All Native Libs</strong><small>SurfaceFlinger, etc</small></div>
+          <div class="gos-box c-aosp"><strong>All HALs</strong><small>Camera, BLE, WiFi...</small></div>
+          <div class="gos-box c-vendor"><strong>Kernel + Drivers</strong><small>Tensor G3 SoC</small></div>
+          <div class="gos-box c-vendor"><strong>Vendor Blobs</strong><small>Pixel 8 hardware</small></div>
+          <div class="gos-box c-aosp"><strong>SELinux + Verified Boot</strong><small>Security foundation</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Source Tree Map</h2>
+  <p>How the 118GB GrapheneOS source tree maps to what we use:</p>
+
+  <pre class="repo-tree"><span class="dir">/src/</span>
+├── <span class="dir">frameworks/</span>        2.4 GB   Android framework         <span class="note">keep — invisible plumbing</span>
+├── <span class="dir">system/</span>            726 MB   Core system (init, adb)    <span class="note">keep</span>
+├── <span class="dir">packages/</span>
+│   ├── <span class="dir">apps/</span>                    System apps
+│   │   ├── Launcher3/              <span class="rm">REPLACED by AIPhoneHome</span>
+│   │   ├── Calculator/             <span class="rm">REMOVE</span>
+│   │   ├── Calendar/               <span class="rm">REMOVE</span>
+│   │   ├── DeskClock/              <span class="rm">REMOVE</span>
+│   │   ├── Gallery2/               <span class="rm">REMOVE</span>
+│   │   ├── Dialer/                 <span class="note">keep</span>
+│   │   ├── Messaging/              <span class="note">keep</span>
+│   │   ├── Camera2/                <span class="note">keep</span>
+│   │   ├── Contacts/               <span class="note">keep</span>
+│   │   ├── Settings/               <span class="note">keep</span>
+│   │   └── <span class="us">AIPhoneHome/</span>            <span class="us">OUR APP (from overlay/)</span>
+│   └── <span class="dir">services/</span>                System services            <span class="note">keep</span>
+├── <span class="dir">external/</span>
+│   ├── <span class="gos">vanadium/</span>      1.0 GB   Hardened Chromium          <span class="gos">OUR WEB RUNTIME</span>
+│   ├── cronet/          1.8 GB   Network stack              <span class="note">keep — Vanadium needs it</span>
+│   ├── opencl/          2.3 GB   GPU compute                <span class="rm">could remove — we use WebGPU</span>
+│   ├── deqp/            1.7 GB   GPU tests                  <span class="rm">remove — testing only</span>
+│   ├── swiftshader/     1.3 GB   Software GPU               <span class="rm">remove — real GPU exists</span>
+│   └── <span class="note">...600+ other libs</span>
+├── <span class="dir">device/google/</span>     4.4 GB   Pixel device trees         <span class="note">keep — hardware config</span>
+│   └── shusky/                    Pixel 8 family             <span class="note">our target device</span>
+├── <span class="dir">kernel/</span>            3.9 GB   Linux kernel source        <span class="note">keep</span>
+├── <span class="dir">hardware/</span>          249 MB   HAL interfaces             <span class="note">keep</span>
+├── <span class="dir">vendor/</span>            786 MB   Vendor config              <span class="note">keep</span>
+├── <span class="dir">prebuilts/</span>          48 GB   Build toolchains           <span class="note">keep (required for compilation)</span>
+│   ├── clang/           15 GB    C/C++ compiler
+│   ├── rust/            6.6 GB   Rust compiler
+│   ├── sdk/             5.9 GB   Android SDK
+│   ├── abi-dumps/       4.0 GB   ABI compat checks          <span class="rm">remove — testing only</span>
+│   └── android-emulator/ 1.9 GB  Emulator binaries          <span class="rm">remove — we flash real hardware</span>
+├── <span class="dir">cts/</span>               2.3 GB   Compat Test Suite          <span class="rm">remove — not certifying</span>
+├── <span class="dir">developers/</span>        437 MB   Samples                    <span class="rm">remove</span>
+├── <span class="dir">development/</span>       412 MB   Dev tools                  <span class="rm">remove</span>
+├── <span class="dir">test/</span>              318 MB   Test framework             <span class="rm">remove</span>
+└── <span class="dir">platform_testing/</span>  191 MB   More tests                 <span class="rm">remove</span>
+
+<span class="note">Total: 118 GB source → ~2 GB system image on phone</span>
+<span class="rm">Removable: ~14 GB (test/dev/emulator junk)</span>
+<span class="us">Our code: 3 files (~500 lines total)</span></pre>
+
+  <h2>Why GrapheneOS Over Stock AOSP</h2>
+  <table>
+    <tr><th>Feature</th><th>We get for free</th></tr>
+    <tr><td>Vanadium (hardened Chromium)</td><td>Our entire TWA runtime, pre-built and maintained. We'd have to build our own Chromium fork otherwise.</td></tr>
+    <tr><td>Hardened memory allocator</td><td>Protection against heap exploits in system services. Relevant because we run untrusted AI-generated code.</td></tr>
+    <tr><td>Hardened kernel (MTE, CFI)</td><td>Memory tagging and control flow integrity. Extra defense layer around the Capability Broker.</td></tr>
+    <tr><td>Per-app network permission</td><td>Generated TWAs can be denied network access per-app. Aligns with our "local-only by default" policy.</td></tr>
+    <tr><td>Per-app sensor permission</td><td>Generated TWAs can be denied sensor access. Maps to our Tier 1 permission model.</td></tr>
+    <tr><td>No Google services</td><td>Exactly what we want. No GMS, no Play Services, no Firebase, no tracking.</td></tr>
+    <tr><td>Pixel 8 device tree</td><td>Maintained and tested monthly. We don't touch device bring-up at all.</td></tr>
+    <tr><td>Security patches</td><td>Monthly AOSP security patches merged by the GrapheneOS team, not by us.</td></tr>
+    <tr><td>Verified boot with own keys</td><td>We can sign our OS with our own keys. Not dependent on Google's signing.</td></tr>
+    <tr><td>OTA update infrastructure</td><td>Existing update server architecture we can adapt.</td></tr>
+  </table>
+
+  <h2>The Minimal Diff</h2>
+  <p>Our entire change from stock GrapheneOS is:</p>
+  <pre><code># overlay/device_aiphone.mk (5 lines)
+PRODUCT_PACKAGES += AIPhoneHome
+PRODUCT_PACKAGES += -Launcher3 -Calculator -Calendar -DeskClock -Gallery2 -Files
+PRODUCT_SYSTEM_PROPERTIES += ro.aiphone.version=0.1.0
+
+# overlay/packages/apps/AIPhoneHome/ (3 files)
+HomeActivity.java    — 50 lines, one WebView
+AndroidManifest.xml  — HOME intent filter
+index.html           — AI chat UI, plain HTML/JS</code></pre>
+  <p>That's it. Three files and a five-line build config. Everything else is GrapheneOS unchanged.</p>
+
+  <div class="page-nav">
+    <a href="foundation.html">&larr; OS Foundation</a>
+    <a href="aosp-build.html">AOSP Build Research &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
