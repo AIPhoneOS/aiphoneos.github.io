@@ -32,7 +32,7 @@
   <div class="model-row winner">
     <div class="model-header"><h4>Gemma 3 1B</h4><span class="badge badge-done">chosen</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~720 MB</td><td>Speed</td><td>~30-40 t/s</td></tr>
+      <tr><td>Size</td><td>~720 MB</td><td>Speed (GPU)</td><td>~35-50 t/s</td></tr>
       <tr><td>Params</td><td>1.0B</td><td>Latency</td><td>~200ms</td></tr>
       <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Google</td></tr>
     </table>
@@ -42,7 +42,7 @@
   <div class="model-row">
     <div class="model-header"><h4>SmolLM 2 360M</h4><span class="badge badge-planned">alternative</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~250 MB</td><td>Speed</td><td>~60-80 t/s</td></tr>
+      <tr><td>Size</td><td>~250 MB</td><td>Speed (GPU)</td><td>~60-80 t/s</td></tr>
       <tr><td>Params</td><td>360M</td><td>Latency</td><td>~100ms</td></tr>
       <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Hugging Face</td></tr>
     </table>
@@ -55,7 +55,7 @@
   <div class="model-row winner">
     <div class="model-header"><h4>Phi-4 Mini 3.8B</h4><span class="badge badge-done">chosen</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~2.5 GB</td><td>Speed</td><td>~10-15 t/s</td></tr>
+      <tr><td>Size</td><td>~2.5 GB</td><td>Speed (GPU)</td><td>~15-25 t/s</td></tr>
       <tr><td>Params</td><td>3.8B</td><td>Gen time</td><td>~15-25 sec</td></tr>
       <tr><td>License</td><td>MIT</td><td>From</td><td>Microsoft</td></tr>
     </table>
@@ -65,7 +65,7 @@
   <div class="model-row">
     <div class="model-header"><h4>Gemma 3 4B</h4><span class="badge badge-planned">alternative</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~2.9 GB</td><td>Speed</td><td>~8-12 t/s</td></tr>
+      <tr><td>Size</td><td>~2.9 GB</td><td>Speed (GPU)</td><td>~10-18 t/s</td></tr>
       <tr><td>Params</td><td>4.0B</td><td>Gen time</td><td>~20-30 sec</td></tr>
       <tr><td>License</td><td>Gemma license</td><td>From</td><td>Google</td></tr>
     </table>
@@ -75,7 +75,7 @@
   <div class="model-row">
     <div class="model-header"><h4>Llama 3.2 3B</h4><span class="badge badge-planned">alternative</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~2.1 GB</td><td>Speed</td><td>~12-18 t/s</td></tr>
+      <tr><td>Size</td><td>~2.1 GB</td><td>Speed (GPU)</td><td>~15-22 t/s</td></tr>
       <tr><td>Params</td><td>3.0B</td><td>Gen time</td><td>~12-20 sec</td></tr>
       <tr><td>License</td><td>Llama 3.2</td><td>From</td><td>Meta</td></tr>
     </table>
@@ -85,7 +85,7 @@
   <div class="model-row">
     <div class="model-header"><h4>Qwen 2.5 3B</h4><span class="badge badge-planned">alternative</span></div>
     <table style="margin:4px 0">
-      <tr><td>Size</td><td>~2.0 GB</td><td>Speed</td><td>~12-18 t/s</td></tr>
+      <tr><td>Size</td><td>~2.0 GB</td><td>Speed (GPU)</td><td>~15-22 t/s</td></tr>
       <tr><td>Params</td><td>3.0B</td><td>Gen time</td><td>~12-20 sec</td></tr>
       <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Alibaba</td></tr>
     </table>
@@ -115,7 +115,8 @@
     <strong>Intent Router:</strong> Gemma 3 1B (720MB, always loaded, ~200ms response)<br>
     <strong>App Generator:</strong> Phi-4 Mini 3.8B (2.5GB, loaded on demand, ~15-25 sec)<br>
     <strong>Cloud Fallback:</strong> Claude Sonnet (complex apps), Claude Haiku (simple queries)<br>
-    <strong>Runtime:</strong> llama.cpp (C/C++, GGUF format, Vulkan + NNAPI backends)
+    <strong>Runtime:</strong> llama.cpp (C/C++, GGUF format)<br>
+    <strong>Compute:</strong> Vulkan GPU (primary) + NNAPI TPU (secondary). CPU never used for inference — reserved for UI.
   </blockquote>
 
   <h2>Sources</h2>

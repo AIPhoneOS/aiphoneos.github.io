@@ -54,32 +54,35 @@
     <li><strong>Proven on Android:</strong> PocketPal AI, Llama on Phone, and other apps already use llama.cpp via NDK.</li>
   </ul>
 
+  <h2>Core Principle</h2>
+  <blockquote>CPU is for the user. GPU/TPU is for the LLM. They never compete. The UI must stay at 120fps while the LLM generates in the background on separate hardware.</blockquote>
+
   <h2>Compute Backends on Pixel 8</h2>
 
-  <h3>CPU (ARM NEON) — Primary</h3>
+  <h3>Vulkan GPU — Primary</h3>
   <ul>
-    <li>Always works. No driver issues. Predictable performance.</li>
-    <li>Uses ARM NEON SIMD instructions for vectorized operations.</li>
-    <li>Pixel 8: 1x Cortex-X3 (3.0 GHz) + 4x A715 (2.6 GHz) + 4x A510 (1.8 GHz)</li>
-    <li>Expected: ~10-15 tokens/sec for 3.8B model, ~30-40 for 1B model.</li>
-    <li>Thermal throttling after 60-90 sec continuous generation.</li>
-  </ul>
-
-  <h3>Vulkan GPU — Experimental</h3>
-  <ul>
+    <li><strong>This is where all LLM inference runs.</strong> Separate hardware from CPU — UI stays smooth.</li>
     <li>Pixel 8 has Imagination BXE-9-256 GPU with Vulkan 1.3 support.</li>
-    <li>llama.cpp Vulkan backend uses compute shaders for matrix operations.</li>
-    <li>Performance is hit-or-miss on Imagination GPUs. Adreno and Mali have more testing.</li>
-    <li>Potential speedup: offload some transformer layers to GPU while CPU handles the rest.</li>
-    <li><strong>Status:</strong> Needs benchmarking on Pixel 8 before committing. May be slower than CPU.</li>
+    <li>llama.cpp Vulkan backend uses compute shaders for matrix multiplication — the core LLM operation.</li>
+    <li>Full layer offloading: <code>--n-gpu-layers 999</code> pushes ALL transformer layers to GPU. CPU does zero inference work.</li>
+    <li>Imagination GPU has less community testing than Adreno/Mali. <strong>Benchmarking on actual Pixel 8 is the #1 priority before Phase 2.</strong></li>
+    <li>If Vulkan performs well: ~15-25 t/s for 3.8B model with zero CPU impact.</li>
   </ul>
 
-  <h3>NNAPI → TPU — Future</h3>
+  <h3>NNAPI → TPU — Secondary Accelerator</h3>
   <ul>
-    <li>Android's Neural Networks API can delegate operations to the Tensor G3 edge TPU.</li>
-    <li>llama.cpp has experimental NNAPI support but it's limited to specific operations.</li>
-    <li>The TPU is optimized for specific op patterns (conv, matmul). Not all transformer ops are supported.</li>
-    <li><strong>Status:</strong> Phase 3+ exploration. Don't depend on this working initially.</li>
+    <li>Android's Neural Networks API can delegate supported operations to the Tensor G3 edge TPU.</li>
+    <li>The TPU is purpose-built for ML inference (matmul, conv). Potentially faster than GPU for these ops.</li>
+    <li>llama.cpp has experimental NNAPI support. If supported ops cover enough of the transformer, we can split: GPU handles attention, TPU handles linear layers.</li>
+    <li><strong>Status:</strong> Experimental. Benchmark alongside Vulkan. Could be a significant speedup.</li>
+  </ul>
+
+  <h3>CPU (ARM NEON) — Last Resort Only</h3>
+  <ul>
+    <li><strong>NOT used for inference by default.</strong> CPU runs the UI, Android framework, WebView rendering.</li>
+    <li>CPU inference exists in llama.cpp as a fallback if Vulkan and NNAPI both fail.</li>
+    <li>If we ever fall back to CPU: limit to 2 threads (out of 9 cores) and lower priority to avoid UI impact.</li>
+    <li>This is the failure mode, not the plan.</li>
   </ul>
 
   <h2>Integration Architecture</h2>
@@ -112,10 +115,11 @@
                        │
           ┌────────────┼────────────┐
           │            │            │
-     CPU (NEON)   Vulkan GPU   NNAPI/TPU
+    Vulkan GPU    NNAPI/TPU    CPU (NEON)
+     PRIMARY       SECONDARY    LAST RESORT
           │            │            │
-      ARM cores   Imagination   Tensor G3
-                   BXE-9-256    Edge TPU</code></pre>
+    Imagination   Tensor G3     ARM cores
+     BXE-9-256    Edge TPU     (runs UI only)</code></pre>
 
   <h2>Memory Management</h2>
   <ul>
