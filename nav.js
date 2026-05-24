@@ -29,8 +29,12 @@ const NAV = [
   { section: 'AI', items: [
     { title: 'AI Architecture', href: 'ai.html' },
     { title: 'App Generation', href: 'generation.html' },
-    { title: 'On-Device AI', href: 'on-device-ai.html' },
-    { title: 'Local LLM Architecture', href: 'local-llm.html' },
+  ]},
+  { section: 'LLM', items: [
+    { title: 'On-Device AI Landscape', href: 'on-device-ai.html' },
+    { title: 'Model Comparison', href: 'llm-models.html' },
+    { title: 'Inference Runtime', href: 'llm-runtime.html' },
+    { title: 'System Architecture', href: 'local-llm.html' },
   ]},
   { section: 'Security', items: [
     { title: 'Security Model', href: 'security.html' },
@@ -83,7 +87,7 @@ function initNav() {
   });
 
   html += `<div class="sidebar-meta">
-    <p>v0.6 &middot; 30 pages</p>
+    <p>v0.7 &middot; 32 pages</p>
     <p class="wn">* working name &mdash; requires trademark clearance</p>
   </div>`;
 

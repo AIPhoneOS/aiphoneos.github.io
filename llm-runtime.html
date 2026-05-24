@@ -1,0 +1,192 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Inference Runtime — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Inference Runtime</h1>
+  <p class="subtitle">How LLM inference actually runs on Pixel 8 hardware</p>
+
+  <h2>Runtime Options Evaluated</h2>
+  <table>
+    <tr><th>Runtime</th><th>Language</th><th>GPU support</th><th>Model format</th><th>Android?</th><th>Verdict</th></tr>
+    <tr style="background:var(--green)08">
+      <td><strong>llama.cpp</strong></td><td>C/C++</td><td>Vulkan, NNAPI</td><td>GGUF</td>
+      <td style="color:var(--green)">Yes (NDK)</td>
+      <td><span class="badge badge-done">chosen</span></td>
+    </tr>
+    <tr>
+      <td>MLC LLM</td><td>C++/Python</td><td>OpenCL, Vulkan</td><td>Custom</td>
+      <td style="color:var(--yellow)">Yes but slow on Pixel</td>
+      <td>CPU-only on Tensor G3</td>
+    </tr>
+    <tr>
+      <td>ONNX Runtime</td><td>C++</td><td>NNAPI, XNNPACK</td><td>ONNX</td>
+      <td style="color:var(--green)">Yes</td>
+      <td>Good for embeddings, not LLMs</td>
+    </tr>
+    <tr>
+      <td>MediaPipe LLM</td><td>C++/Java</td><td>GPU delegate</td><td>TFLite</td>
+      <td style="color:var(--green)">Yes</td>
+      <td>Tied to Google ecosystem</td>
+    </tr>
+    <tr>
+      <td>TensorFlow Lite</td><td>C++/Java</td><td>GPU, NNAPI</td><td>TFLite</td>
+      <td style="color:var(--green)">Yes</td>
+      <td>Not optimized for LLM inference</td>
+    </tr>
+    <tr>
+      <td>ExecuTorch (Meta)</td><td>C++</td><td>XNNPACK, Vulkan</td><td>Custom</td>
+      <td style="color:var(--yellow)">Early</td>
+      <td>Promising but immature</td>
+    </tr>
+  </table>
+
+  <h2>Why llama.cpp</h2>
+  <ul>
+    <li><strong>Ecosystem:</strong> GGUF is the universal model format. Every model we evaluated ships in GGUF. No conversion needed.</li>
+    <li><strong>Simplicity:</strong> Compiles to a single <code>.so</code> library. No Python runtime, no Java framework, no TensorFlow dependency.</li>
+    <li><strong>Performance:</strong> Heavily optimized for ARM NEON (Pixel 8's CPU). Memory-mapped model loading avoids copying 2.5GB into RAM.</li>
+    <li><strong>Active development:</strong> Most active open-source LLM inference project. New optimizations weekly.</li>
+    <li><strong>License:</strong> MIT. No restrictions.</li>
+    <li><strong>Proven on Android:</strong> PocketPal AI, Llama on Phone, and other apps already use llama.cpp via NDK.</li>
+  </ul>
+
+  <h2>Compute Backends on Pixel 8</h2>
+
+  <h3>CPU (ARM NEON) — Primary</h3>
+  <ul>
+    <li>Always works. No driver issues. Predictable performance.</li>
+    <li>Uses ARM NEON SIMD instructions for vectorized operations.</li>
+    <li>Pixel 8: 1x Cortex-X3 (3.0 GHz) + 4x A715 (2.6 GHz) + 4x A510 (1.8 GHz)</li>
+    <li>Expected: ~10-15 tokens/sec for 3.8B model, ~30-40 for 1B model.</li>
+    <li>Thermal throttling after 60-90 sec continuous generation.</li>
+  </ul>
+
+  <h3>Vulkan GPU — Experimental</h3>
+  <ul>
+    <li>Pixel 8 has Imagination BXE-9-256 GPU with Vulkan 1.3 support.</li>
+    <li>llama.cpp Vulkan backend uses compute shaders for matrix operations.</li>
+    <li>Performance is hit-or-miss on Imagination GPUs. Adreno and Mali have more testing.</li>
+    <li>Potential speedup: offload some transformer layers to GPU while CPU handles the rest.</li>
+    <li><strong>Status:</strong> Needs benchmarking on Pixel 8 before committing. May be slower than CPU.</li>
+  </ul>
+
+  <h3>NNAPI → TPU — Future</h3>
+  <ul>
+    <li>Android's Neural Networks API can delegate operations to the Tensor G3 edge TPU.</li>
+    <li>llama.cpp has experimental NNAPI support but it's limited to specific operations.</li>
+    <li>The TPU is optimized for specific op patterns (conv, matmul). Not all transformer ops are supported.</li>
+    <li><strong>Status:</strong> Phase 3+ exploration. Don't depend on this working initially.</li>
+  </ul>
+
+  <h2>Integration Architecture</h2>
+  <pre><code>┌─────────────────────────────────────────────────┐
+│ AiService (Java, Android Foreground Service)    │
+│                                                 │
+│  ┌─────────────┐  ┌─────────────────────────┐   │
+│  │ ModelManager │  │ InferenceEngine (JNI)   │   │
+│  │ load/unload  │──│                         │   │
+│  │ memory mgmt  │  │  ┌──────────────────┐   │   │
+│  └─────────────┘  │  │ libllama.so       │   │   │
+│                    │  │ (llama.cpp)       │   │   │
+│  ┌─────────────┐  │  │                   │   │   │
+│  │IntentRouter  │  │  │ ┌──────────────┐ │   │   │
+│  │(Gemma 1B)   │──│  │ │ CPU (NEON)   │ │   │   │
+│  └─────────────┘  │  │ ├──────────────┤ │   │   │
+│                    │  │ │ Vulkan GPU   │ │   │   │
+│  ┌─────────────┐  │  │ ├──────────────┤ │   │   │
+│  │AppGenerator  │  │  │ │ NNAPI (TPU)  │ │   │   │
+│  │(Phi-4 Mini) │──│  │ └──────────────┘ │   │   │
+│  └─────────────┘  │  └──────────────────┘   │   │
+│                    └─────────────────────────┘   │
+└──────────────────────┬──────────────────────────┘
+                       │ JNI calls
+            ┌──────────┴──────────┐
+            │ Native Layer (C/C++) │
+            │ libllama.so          │
+            │ libggml.so           │
+            └──────────┬──────────┘
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+     CPU (NEON)   Vulkan GPU   NNAPI/TPU
+          │            │            │
+      ARM cores   Imagination   Tensor G3
+                   BXE-9-256    Edge TPU</code></pre>
+
+  <h2>Memory Management</h2>
+  <ul>
+    <li><strong>mmap loading:</strong> Model files are memory-mapped, not read into RAM. The OS pages in only what's needed. This means a 2.5GB model doesn't use 2.5GB of physical RAM immediately.</li>
+    <li><strong>KV cache:</strong> The key-value cache for context grows during generation. For 2K token context on a 3.8B model: ~200MB additional RAM.</li>
+    <li><strong>Hot-swap:</strong> When switching from Phi-4 Mini back to Gemma 1B, we <code>munmap()</code> the large model and mmap the small one. Target: under 2 seconds.</li>
+    <li><strong>OOM protection:</strong> Android's low-memory killer will target our model before killing user apps. AiService monitors memory pressure and proactively unloads if RAM drops below 500MB free.</li>
+  </ul>
+
+  <h2>Building llama.cpp for Android</h2>
+  <pre><code># Cross-compile llama.cpp for Android ARM64 with Vulkan
+git clone https://github.com/ggml-org/llama.cpp
+cd llama.cpp
+
+# Using Android NDK
+cmake -B build-android \
+  -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-33 \
+  -DGGML_VULKAN=ON \
+  -DGGML_NATIVE=OFF \
+  -DBUILD_SHARED_LIBS=ON
+
+cmake --build build-android --config Release
+
+# Output: build-android/src/libllama.so + build-android/ggml/src/libggml.so
+# Copy to: system/lib64/ in AOSP overlay</code></pre>
+
+  <h2>JNI Bridge (Java ↔ C++)</h2>
+  <pre><code>// InferenceEngine.java — JNI wrapper for llama.cpp
+public class InferenceEngine {
+    static { System.loadLibrary("llama"); }
+
+    // Native methods — implemented in C++
+    private native long nativeInit(String modelPath, int nThreads, boolean useVulkan);
+    private native String nativeComplete(long ctx, String prompt, int maxTokens);
+    private native int nativeTokenCount(long ctx, String text);
+    private native void nativeAbort(long ctx);
+    private native void nativeFree(long ctx);
+
+    private long ctx = 0;
+
+    public void load(String modelPath, boolean useGpu) {
+        ctx = nativeInit(modelPath, 4, useGpu);  // 4 threads
+    }
+
+    public String complete(String prompt, int maxTokens) {
+        if (ctx == 0) throw new IllegalStateException("Model not loaded");
+        return nativeComplete(ctx, prompt, maxTokens);
+    }
+
+    public void unload() {
+        if (ctx != 0) { nativeFree(ctx); ctx = 0; }
+    }
+}</code></pre>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp — GitHub</a></li>
+    <li><a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md" target="_blank" rel="noopener">llama.cpp Build Documentation</a></li>
+    <li><a href="https://github.com/ggml-org/llama.cpp/discussions/9464" target="_blank" rel="noopener">llama.cpp Vulkan on Android — Discussion</a></li>
+    <li><a href="https://github.com/ggml-org/llama.cpp/issues/8705" target="_blank" rel="noopener">GPU acceleration on Android — Issue</a></li>
+    <li><a href="https://github.com/a-ghorbani/pocketpal-ai" target="_blank" rel="noopener">PocketPal AI — Reference Android LLM app using llama.cpp</a></li>
+    <li><a href="https://mvpfactory.io/blog/on-device-llm-inference-via-kmp-and-llama-cpp-memory-mapped-model-loading-ane" target="_blank" rel="noopener">On-Device LLM: Memory-Mapped Model Loading</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="llm-models.html">&larr; Model Comparison</a>
+    <a href="local-llm.html">Local LLM Architecture &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

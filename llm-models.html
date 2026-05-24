@@ -1,0 +1,137 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Model Comparison — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.model-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 10px 0; }
+.model-row.winner { border-color: var(--green); border-width: 2px; }
+.model-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.model-header h4 { margin: 0; }
+.ram-bar { height: 10px; border-radius: 5px; background: var(--surface-2); margin: 6px 0; overflow: hidden; }
+.ram-fill { height: 100%; border-radius: 5px; }
+.ram-label { font-size: 11px; color: var(--text-2); display: flex; justify-content: space-between; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Model Comparison</h1>
+  <p class="subtitle">Every model that fits on Pixel 8, ranked for our use case</p>
+
+  <h2>The Constraint</h2>
+  <p>Pixel 8 has 8GB RAM. The OS + framework + WebView uses ~4GB. That leaves <strong>~4GB for models</strong>. All sizes below are Q4_K_M quantization (4-bit, ~95% of full quality).</p>
+
+  <div class="ram-bar" style="width:100%">
+    <div class="ram-fill" style="width:50%;background:var(--red)"></div>
+  </div>
+  <div class="ram-label"><span>OS + Framework (~4GB)</span><span>Available for models (~4GB)</span></div>
+
+  <h2>Intent Routing Models (always loaded)</h2>
+  <p>The intent router classifies every user input. Must be tiny, fast, always in memory.</p>
+
+  <div class="model-row winner">
+    <div class="model-header"><h4>Gemma 3 1B</h4><span class="badge badge-done">chosen</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~720 MB</td><td>Speed</td><td>~30-40 t/s</td></tr>
+      <tr><td>Params</td><td>1.0B</td><td>Latency</td><td>~200ms</td></tr>
+      <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Google</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0">Tiny, fast, good at classification. "Is this create/modify/query/action?" — that's all it needs to do. 720MB leaves 3.3GB for the generation model. Apache license means no restrictions.</p>
+  </div>
+
+  <div class="model-row">
+    <div class="model-header"><h4>SmolLM 2 360M</h4><span class="badge badge-planned">alternative</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~250 MB</td><td>Speed</td><td>~60-80 t/s</td></tr>
+      <tr><td>Params</td><td>360M</td><td>Latency</td><td>~100ms</td></tr>
+      <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Hugging Face</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0">Even smaller. If Gemma 1B is overkill for classification, this saves 470MB of RAM. May need fine-tuning for our specific intent categories.</p>
+  </div>
+
+  <h2>App Generation Models (loaded on demand)</h2>
+  <p>Generates HTML/CSS/JS from prompts. Loaded when user creates/modifies an app, unloaded after. Code quality is critical.</p>
+
+  <div class="model-row winner">
+    <div class="model-header"><h4>Phi-4 Mini 3.8B</h4><span class="badge badge-done">chosen</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~2.5 GB</td><td>Speed</td><td>~10-15 t/s</td></tr>
+      <tr><td>Params</td><td>3.8B</td><td>Gen time</td><td>~15-25 sec</td></tr>
+      <tr><td>License</td><td>MIT</td><td>From</td><td>Microsoft</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0"><strong>Smartest sub-4B model in 2026.</strong> Outperforms Gemma 3 4B and Llama 3.2 3B on chain-of-thought and code tasks. MIT license. Strong at structured output (HTML generation). The best we can fit.</p>
+  </div>
+
+  <div class="model-row">
+    <div class="model-header"><h4>Gemma 3 4B</h4><span class="badge badge-planned">alternative</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~2.9 GB</td><td>Speed</td><td>~8-12 t/s</td></tr>
+      <tr><td>Params</td><td>4.0B</td><td>Gen time</td><td>~20-30 sec</td></tr>
+      <tr><td>License</td><td>Gemma license</td><td>From</td><td>Google</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0">Slightly larger, slightly slower. Good at code but Phi-4 Mini beats it on reasoning benchmarks at smaller size. Gemma license has some restrictions (no competing with Google services).</p>
+  </div>
+
+  <div class="model-row">
+    <div class="model-header"><h4>Llama 3.2 3B</h4><span class="badge badge-planned">alternative</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~2.1 GB</td><td>Speed</td><td>~12-18 t/s</td></tr>
+      <tr><td>Params</td><td>3.0B</td><td>Gen time</td><td>~12-20 sec</td></tr>
+      <tr><td>License</td><td>Llama 3.2</td><td>From</td><td>Meta</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0">Smaller and faster but less capable at code generation. Good instruction following. Llama license has usage restrictions above 700M monthly active users (not our concern yet).</p>
+  </div>
+
+  <div class="model-row">
+    <div class="model-header"><h4>Qwen 2.5 3B</h4><span class="badge badge-planned">alternative</span></div>
+    <table style="margin:4px 0">
+      <tr><td>Size</td><td>~2.0 GB</td><td>Speed</td><td>~12-18 t/s</td></tr>
+      <tr><td>Params</td><td>3.0B</td><td>Gen time</td><td>~12-20 sec</td></tr>
+      <tr><td>License</td><td>Apache 2.0</td><td>From</td><td>Alibaba</td></tr>
+    </table>
+    <p style="font-size:13px;margin:6px 0 0">Best multilingual option. If we need the OS to generate apps in non-English languages, Qwen is the choice. Apache license, no restrictions. Code quality slightly below Phi-4 Mini.</p>
+  </div>
+
+  <h2>Cloud Models (fallback)</h2>
+  <table>
+    <tr><th>Model</th><th>Use case</th><th>Cost</th><th>Quality</th></tr>
+    <tr><td><strong>Claude Sonnet</strong></td><td>Complex app generation, multi-file apps</td><td>~$0.01-0.05 per app</td><td>Excellent code quality</td></tr>
+    <tr><td><strong>Claude Haiku</strong></td><td>Simple queries, classification when local unavailable</td><td>~$0.001 per query</td><td>Good for simple tasks</td></tr>
+  </table>
+  <p>Cloud is used when: (1) app is too complex for Phi-4 Mini, (2) user explicitly requests higher quality, (3) device is thermal-throttled, (4) local generation fails validation.</p>
+
+  <h2>Why Not Bigger Models?</h2>
+  <table>
+    <tr><th>Model</th><th>Size (Q4)</th><th>Why not</th></tr>
+    <tr><td>Llama 3.2 7B</td><td>~4.5 GB</td><td>Doesn't fit alongside the OS in 8GB RAM</td></tr>
+    <tr><td>Mistral 7B</td><td>~4.5 GB</td><td>Same — too large for 8GB device</td></tr>
+    <tr><td>Phi-4 14B</td><td>~9 GB</td><td>Way too large. Needs 16GB+ device.</td></tr>
+    <tr><td>Gemma 3 12B</td><td>~8 GB</td><td>Would require the entire device RAM.</td></tr>
+  </table>
+  <p>The 4GB available RAM ceiling is hard. Pixel 9 Pro (16GB) could run 7B models. Future hardware expansion is a path to better local generation.</p>
+
+  <h2>Decision Summary</h2>
+  <blockquote>
+    <strong>Intent Router:</strong> Gemma 3 1B (720MB, always loaded, ~200ms response)<br>
+    <strong>App Generator:</strong> Phi-4 Mini 3.8B (2.5GB, loaded on demand, ~15-25 sec)<br>
+    <strong>Cloud Fallback:</strong> Claude Sonnet (complex apps), Claude Haiku (simple queries)<br>
+    <strong>Runtime:</strong> llama.cpp (C/C++, GGUF format, Vulkan + NNAPI backends)
+  </blockquote>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://www.promptquorum.com/power-local-llm/mobile-llm-models-phi4-gemma-smollm" target="_blank" rel="noopener">Best Mobile LLM Models 2026: Phi-4 vs Gemma 3 vs SmolLM</a></li>
+    <li><a href="https://localaimaster.com/blog/small-language-models-guide-2026" target="_blank" rel="noopener">Best Small Language Models 2026: 12 SLMs for 8GB RAM</a></li>
+    <li><a href="https://awesomeagents.ai/leaderboards/edge-mobile-llm-leaderboard/" target="_blank" rel="noopener">Edge and Mobile LLM Leaderboard 2026</a></li>
+    <li><a href="https://dev.to/engineeredai/run-a-local-llm-on-android-what-ram-tier-you-need-and-which-models-actually-work-2nkp" target="_blank" rel="noopener">Run a Local LLM on Android: What RAM Tier You Need</a></li>
+    <li><a href="https://huggingface.co/blog/daya-shankar/open-source-llms" target="_blank" rel="noopener">Best Open-Source LLM Models 2026</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="on-device-ai.html">&larr; On-Device AI Landscape</a>
+    <a href="llm-runtime.html">Inference Runtime &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
