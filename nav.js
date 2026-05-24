@@ -30,6 +30,7 @@ const NAV = [
     { title: 'AI Architecture', href: 'ai.html' },
     { title: 'App Generation', href: 'generation.html' },
     { title: 'On-Device AI', href: 'on-device-ai.html' },
+    { title: 'Local LLM Architecture', href: 'local-llm.html' },
   ]},
   { section: 'Security', items: [
     { title: 'Security Model', href: 'security.html' },

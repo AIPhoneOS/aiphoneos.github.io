@@ -1,0 +1,242 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Local LLM Architecture — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.model-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 8px 0; display: flex; gap: 14px; align-items: flex-start; }
+.model-card.pick { border-color: var(--green); border-width: 2px; }
+.model-stats { font-size: 12px; color: var(--text-2); }
+.model-stats span { display: inline-block; margin-right: 12px; }
+.model-name { font-weight: 600; font-size: 15px; }
+.model-bar { height: 8px; border-radius: 4px; margin: 6px 0; }
+.arch-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 12px 0; }
+.arch-box h4 { color: var(--accent); margin-bottom: 8px; }
+.flow-step { display: flex; gap: 12px; margin: 8px 0; align-items: flex-start; }
+.flow-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.flow-text { font-size: 13px; padding-top: 4px; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Local LLM Architecture</h1>
+  <p class="subtitle">What model, what runtime, how it becomes the core of the OS</p>
+
+  <h2>The Pixel 8 AI Hardware</h2>
+  <table>
+    <tr><th>Component</th><th>Spec</th><th>AI relevance</th></tr>
+    <tr><td>CPU</td><td>9 cores (1x Cortex-X3 + 4x A715 + 4x A510)</td><td>Reliable fallback for inference. NEON SIMD.</td></tr>
+    <tr><td>GPU</td><td>Imagination BXE-9-256 (Vulkan 1.3)</td><td>Vulkan compute for parallel inference. Hit-or-miss perf on llama.cpp.</td></tr>
+    <tr><td>TPU</td><td>Google Edge TPU (next-gen)</td><td>Purpose-built for ML inference. Accessed via NNAPI. Fast for supported ops.</td></tr>
+    <tr><td>RAM</td><td>8GB LPDDR5X</td><td>~4GB available after OS. Constrains model size.</td></tr>
+    <tr><td>Storage</td><td>128/256GB UFS 3.1</td><td>Model files stored here. ~1-3GB per model.</td></tr>
+  </table>
+
+  <h2>What Fits in 4GB of Available RAM</h2>
+  <p>With the OS using ~4GB, we have ~4GB for a model. Q4_K_M quantization (4-bit, ~95% quality) is the standard for mobile in 2026.</p>
+
+  <div class="model-card pick">
+    <div>
+      <div class="model-name">Phi-4 Mini (3.8B) — RECOMMENDED</div>
+      <div class="model-stats">
+        <span>Size: ~2.5GB</span>
+        <span>Params: 3.8B</span>
+        <span>Quant: Q4_K_M</span>
+      </div>
+      <div class="model-bar" style="width:62%;background:var(--green)"></div>
+      <p style="font-size:13px;margin:4px 0 0">Smartest sub-4B model in 2026. Outperforms Gemma 3 4B and Llama 3.2 3B on reasoning tasks despite smaller size. Strong at code generation — critical for our app generation pipeline. From Microsoft.</p>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div>
+      <div class="model-name">Gemma 3 1B — FAST FALLBACK</div>
+      <div class="model-stats">
+        <span>Size: ~720MB</span>
+        <span>Params: 1B</span>
+        <span>Quant: Q4_K_M</span>
+      </div>
+      <div class="model-bar" style="width:18%;background:var(--accent)"></div>
+      <p style="font-size:13px;margin:4px 0 0">Tiny and fast. Good for intent classification ("is this a create/modify/question request?"), not good enough for app generation. From Google, Apache 2.0 license.</p>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div>
+      <div class="model-name">Qwen 2.5 1.5B — MULTILINGUAL</div>
+      <div class="model-stats">
+        <span>Size: ~1.1GB</span>
+        <span>Params: 1.5B</span>
+        <span>Quant: Q4_K_M</span>
+      </div>
+      <div class="model-bar" style="width:27%;background:var(--accent-2)"></div>
+      <p style="font-size:13px;margin:4px 0 0">Best multilingual small model. If the OS needs to work in languages beyond English, this is the intent router. From Alibaba, Apache 2.0.</p>
+    </div>
+  </div>
+
+  <div class="model-card">
+    <div>
+      <div class="model-name">Llama 3.2 3B</div>
+      <div class="model-stats">
+        <span>Size: ~2.1GB</span>
+        <span>Params: 3B</span>
+        <span>Quant: Q4_K_M</span>
+      </div>
+      <div class="model-bar" style="width:52%;background:#ff9500"></div>
+      <p style="font-size:13px;margin:4px 0 0">Solid general purpose. Good instruction following. From Meta, Llama license. Outperformed by Phi-4 Mini at similar size.</p>
+    </div>
+  </div>
+
+  <h2>Inference Runtime: llama.cpp</h2>
+  <p>llama.cpp is the clear choice for our on-device inference engine:</p>
+  <ul>
+    <li><strong>Pure C/C++</strong> — no Python, no framework overhead. Compiles to a single binary.</li>
+    <li><strong>GGUF model format</strong> — the standard quantized format. Every model above ships in GGUF.</li>
+    <li><strong>CPU inference with ARM NEON</strong> — reliable, works on all ARM devices including Pixel 8.</li>
+    <li><strong>Vulkan GPU backend</strong> — can offload layers to GPU. Performance varies on Imagination GPU but worth enabling.</li>
+    <li><strong>NNAPI delegation</strong> — experimental support for Android's Neural Networks API, which can route to Tensor G3 TPU.</li>
+    <li><strong>Memory-mapped model loading</strong> — model file is mmap'd, not loaded into RAM. OS manages paging.</li>
+    <li><strong>MIT license</strong> — no licensing issues.</li>
+  </ul>
+
+  <h3>Expected Performance on Pixel 8</h3>
+  <table>
+    <tr><th>Model</th><th>Backend</th><th>Tokens/sec (est.)</th><th>Latency to first token</th></tr>
+    <tr><td>Gemma 3 1B</td><td>CPU (NEON)</td><td>~30-40 t/s</td><td>~200ms</td></tr>
+    <tr><td>Qwen 2.5 1.5B</td><td>CPU (NEON)</td><td>~20-30 t/s</td><td>~300ms</td></tr>
+    <tr><td>Phi-4 Mini 3.8B</td><td>CPU (NEON)</td><td>~10-15 t/s</td><td>~500ms</td></tr>
+    <tr><td>Phi-4 Mini 3.8B</td><td>Vulkan GPU</td><td>~15-25 t/s (if driver works)</td><td>~400ms</td></tr>
+  </table>
+  <p style="font-size:12px;color:var(--text-2)">Estimates based on benchmarks from similar devices. Actual performance depends on thermal state. After 60-90 seconds of continuous generation, thermal throttling drops performance 40-60%.</p>
+
+  <h2>Two-Model Strategy</h2>
+  <p>We run TWO models, not one. Different jobs need different sizes:</p>
+
+  <div class="arch-box">
+    <h4>Model A: Intent Router (always loaded)</h4>
+    <p><strong>Gemma 3 1B</strong> — 720MB in RAM, instant response</p>
+    <p>Classifies every user input: "is this a request to create an app, modify an app, ask a question, or perform a system action?" Does NOT generate apps. Just routes.</p>
+    <p>This model stays loaded in memory permanently. 720MB is small enough to coexist with the OS and an active app.</p>
+  </div>
+
+  <div class="arch-box">
+    <h4>Model B: App Generator (loaded on demand)</h4>
+    <p><strong>Phi-4 Mini 3.8B</strong> — 2.5GB, loaded when user asks to create/modify an app</p>
+    <p>Generates actual HTML/CSS/JS code. Loaded into memory when a generation request comes in, unloaded after. For complex apps, falls back to cloud (Claude API) for higher quality.</p>
+    <p>When this model is loaded, the intent router may be swapped out temporarily. That's OK — generation takes 10-30 seconds, then we swap back.</p>
+  </div>
+
+  <h2>System Architecture: AI Service</h2>
+  <p>The local LLM is managed by a system-level Android service called <strong>AiService</strong>. This is the control module.</p>
+
+  <div class="arch-box">
+    <h4>AiService — The AI Control Module</h4>
+    <pre><code>AiService (Android Foreground Service)
+├── ModelManager
+│   ├── load(modelPath, backend)     // mmap GGUF, init llama.cpp
+│   ├── unload()                      // free memory
+│   ├── isLoaded()                    // check state
+│   └── getMemoryUsage()             // monitor RAM
+│
+├── IntentRouter (Gemma 1B — always loaded)
+│   ├── classify(userText)            // → create | modify | query | action
+│   └── extractEntities(text)         // → app name, parameters
+│
+├── AppGenerator
+│   ├── generate(prompt, context)     // → HTML/CSS/JS
+│   │   ├── tryLocal(Phi-4 Mini)      // attempt on-device first
+│   │   └── fallbackCloud(Claude)     // if local fails or times out
+│   ├── modify(existingHtml, prompt)  // update existing app
+│   └── validate(html)                // static analysis before install
+│
+├── QueryHandler
+│   ├── ask(prompt)                   // general questions
+│   ├── summarize(text)               // text summarization
+│   ├── classify(text, categories)    // classification
+│   └── extract(text, schema)         // structured extraction
+│
+└── InferenceEngine (llama.cpp wrapper)
+    ├── init(ggufPath, params)        // load model
+    ├── complete(prompt, maxTokens)   // generate text
+    ├── tokenize(text)                // count tokens
+    ├── setBackend(cpu|vulkan|nnapi)  // choose compute
+    └── abort()                       // cancel generation</code></pre>
+  </div>
+
+  <h2>Data Flow: User Says "Make me a timer"</h2>
+
+  <div class="flow-step"><div class="flow-num">1</div><div class="flow-text"><strong>User types/speaks</strong> "make me a timer" in AIPhoneHome WebView</div></div>
+  <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>WebView JS</strong> calls native bridge → AiService receives the text</div></div>
+  <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>IntentRouter</strong> (Gemma 1B, already loaded) classifies: "create app" with entity "timer"<br><span style="color:var(--text-2)">~200ms, on-device, no network</span></div></div>
+  <div class="flow-step"><div class="flow-num">4</div><div class="flow-text"><strong>ModelManager</strong> loads Phi-4 Mini (2.5GB) into memory<br><span style="color:var(--text-2)">~2-3 seconds to load from storage via mmap</span></div></div>
+  <div class="flow-step"><div class="flow-num">5</div><div class="flow-text"><strong>AppGenerator</strong> runs Phi-4 Mini with system prompt + "create a timer app"<br><span style="color:var(--text-2)">~10-20 seconds to generate ~2000 tokens of HTML/CSS/JS at ~15 t/s</span></div></div>
+  <div class="flow-step"><div class="flow-num">6</div><div class="flow-text"><strong>validate()</strong> runs static analysis on generated code (CSP, deny-list patterns)<br><span style="color:var(--text-2)">~100ms</span></div></div>
+  <div class="flow-step"><div class="flow-num">7</div><div class="flow-text"><strong>ModelManager</strong> unloads Phi-4 Mini, reloads Gemma 1B for intent routing<br><span style="color:var(--text-2)">~1 second</span></div></div>
+  <div class="flow-step"><div class="flow-num">8</div><div class="flow-text"><strong>App installed</strong> as TWA, user taps to open<br><span style="color:var(--text-2)">Total: ~15-25 seconds fully on-device, zero network</span></div></div>
+
+  <h2>Cloud Fallback Strategy</h2>
+  <table>
+    <tr><th>Scenario</th><th>What happens</th></tr>
+    <tr><td>Simple intent ("open timer", "what time is it")</td><td>Gemma 1B handles entirely on-device. No cloud.</td></tr>
+    <tr><td>Simple app ("make a todo list")</td><td>Phi-4 Mini generates on-device. ~15-25 seconds.</td></tr>
+    <tr><td>Complex app ("expense tracker with charts and camera")</td><td>Phi-4 Mini attempts first. If quality is poor, falls back to Claude API.</td></tr>
+    <tr><td>No network available</td><td>All requests handled locally. Quality may be lower for complex apps.</td></tr>
+    <tr><td>Thermal throttling</td><td>If device is hot, skip local generation and go straight to cloud.</td></tr>
+    <tr><td>In-app AI queries (<code>aiphone.ai.ask()</code>)</td><td>Gemma 1B for simple queries, Claude for complex. User-configurable.</td></tr>
+  </table>
+
+  <h2>How llama.cpp Integrates Into the OS</h2>
+  <p>llama.cpp compiles to a shared library (<code>libllama.so</code>) that lives in the system partition:</p>
+  <pre><code>/system/lib64/libllama.so          — llama.cpp inference engine
+/system/lib64/libggml.so           — GGML tensor library
+/data/local/aiphone/models/
+  ├── gemma-3-1b-q4_k_m.gguf      — intent router (720MB)
+  └── phi-4-mini-q4_k_m.gguf      — app generator (2.5GB)
+
+AiService (Java) → JNI → libllama.so → CPU/Vulkan/NNAPI → hardware</code></pre>
+
+  <h2>Battery Impact</h2>
+  <ul>
+    <li><strong>Intent routing (Gemma 1B):</strong> ~200ms per classification. Negligible battery impact. Equivalent to a web page load.</li>
+    <li><strong>App generation (Phi-4 Mini):</strong> ~15-25 seconds of full CPU load. Roughly equivalent to taking a 15-second video. Maybe 0.5-1% battery per generation.</li>
+    <li><strong>Idle:</strong> Models are mmap'd, not actively in RAM when unused. Zero battery drain when not generating.</li>
+    <li><strong>Thermal:</strong> Continuous generation for >60 seconds triggers thermal throttling. The OS should queue requests, not allow concurrent generation.</li>
+  </ul>
+
+  <h2>Phase Rollout</h2>
+  <table>
+    <tr><th>Phase</th><th>AI capability</th><th>Models</th></tr>
+    <tr><td><strong>Phase 1</strong></td><td>Cloud only. Claude API for everything.</td><td>None local.</td></tr>
+    <tr><td><strong>Phase 2</strong></td><td>Local intent routing. Cloud for generation.</td><td>Gemma 1B (720MB)</td></tr>
+    <tr><td><strong>Phase 3</strong></td><td>Local generation for simple apps. Cloud fallback.</td><td>Gemma 1B + Phi-4 Mini (3.2GB total)</td></tr>
+    <tr><td><strong>Phase 4+</strong></td><td>Fully offline capable. Cloud optional.</td><td>Both models + local embeddings for search</td></tr>
+  </table>
+
+  <h2>Open Questions</h2>
+  <ul>
+    <li><strong>Vulkan performance on Imagination GPU:</strong> needs real-world benchmarking on Pixel 8. May be slower than CPU.</li>
+    <li><strong>NNAPI + TPU delegation:</strong> can llama.cpp delegate specific ops to the Tensor G3 TPU? Experimental, needs testing.</li>
+    <li><strong>Model quality for code generation:</strong> can Phi-4 Mini at 4-bit quantization generate correct, functional HTML/CSS/JS consistently? Needs systematic testing.</li>
+    <li><strong>Hot-swap latency:</strong> how fast can we unload Phi-4 Mini and reload Gemma 1B? Target: under 2 seconds.</li>
+    <li><strong>WebGPU inference in Vanadium:</strong> could we run inference inside the browser runtime via WebGPU instead of a system service? Worth exploring in Phase 4+.</li>
+  </ul>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp — GitHub</a></li>
+    <li><a href="https://www.promptquorum.com/power-local-llm/mobile-llm-models-phi4-gemma-smollm" target="_blank" rel="noopener">Best Mobile LLM Models 2026: Phi-4 vs Gemma 3 vs SmolLM</a></li>
+    <li><a href="https://localaimaster.com/blog/small-language-models-guide-2026" target="_blank" rel="noopener">Best Small Language Models 2026: 12 SLMs for 8GB RAM</a></li>
+    <li><a href="https://mvpfactory.io/blog/on-device-llm-inference-via-kmp-and-llama-cpp-memory-mapped-model-loading-ane" target="_blank" rel="noopener">On-Device LLM Inference via llama.cpp: Memory-Mapped Loading</a></li>
+    <li><a href="https://github.com/ggml-org/llama.cpp/discussions/9464" target="_blank" rel="noopener">llama.cpp Vulkan on Android GPU — Performance Discussion</a></li>
+    <li><a href="https://arxiv.org/html/2410.03613v3" target="_blank" rel="noopener">Large Language Models on Mobile Devices: Performance Study</a></li>
+    <li><a href="https://github.com/a-ghorbani/pocketpal-ai" target="_blank" rel="noopener">PocketPal AI — Reference Android LLM app</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="on-device-ai.html">&larr; On-Device AI</a>
+    <a href="security.html">Security &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
