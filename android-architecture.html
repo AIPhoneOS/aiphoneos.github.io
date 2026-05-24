@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Android Architecture Diagram — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.diagram { margin: 20px 0; overflow-x: auto; }
+.layer {
+  border: 1px solid var(--border); border-radius: 10px; margin: 8px 0;
+  overflow: hidden;
+}
+.layer-header {
+  padding: 8px 14px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.layer-body {
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 14px;
+}
+.box {
+  padding: 8px 12px; border-radius: 8px; font-size: 12px;
+  border: 1px solid; line-height: 1.3; min-width: 100px; text-align: center;
+}
+.box small { display: block; font-size: 10px; opacity: 0.7; margin-top: 2px; }
+
+/* Colors per layer */
+.l-ours .layer-header { background: var(--accent); color: #fff; }
+.l-ours .box { background: #0a84ff22; border-color: var(--accent); color: var(--accent); }
+
+.l-runtime .layer-header { background: var(--accent-2); color: #fff; }
+.l-runtime .box { background: #7c5cff22; border-color: var(--accent-2); color: var(--accent-2); }
+
+.l-framework .layer-header { background: #ff9500; color: #fff; }
+.l-framework .box { background: #ff950022; border-color: #ff9500; color: #ff9500; }
+
+.l-native .layer-header { background: var(--green); color: #000; }
+.l-native .box { background: #30d15822; border-color: var(--green); color: var(--green); }
+
+.l-hal .layer-header { background: var(--yellow); color: #000; }
+.l-hal .box { background: #ffd60a22; border-color: var(--yellow); color: var(--yellow); }
+
+.l-kernel .layer-header { background: var(--red); color: #fff; }
+.l-kernel .box { background: #ff453a22; border-color: var(--red); color: var(--red); }
+
+.l-hw .layer-header { background: var(--text-2); color: #fff; }
+.l-hw .box { background: #88889822; border-color: var(--text-2); color: var(--text-2); }
+
+/* Arrow connectors */
+.arrow { text-align: center; color: var(--text-2); font-size: 18px; margin: 2px 0; }
+
+/* Legend */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; font-size: 12px; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Annotations */
+.note { font-size: 12px; color: var(--text-2); padding: 4px 14px; }
+.tag-keep { color: var(--green); font-size: 10px; font-weight: 600; }
+.tag-ours { color: var(--accent); font-size: 10px; font-weight: 600; }
+.tag-strip { color: var(--red); font-size: 10px; font-weight: 600; }
+.tag-hide { color: var(--yellow); font-size: 10px; font-weight: 600; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Android Architecture Diagram</h1>
+  <p class="subtitle">The full AOSP stack — what we keep, what we replace, what stays invisible</p>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Our code</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-2)"></div> Runtime (keep)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ff9500"></div> Framework (keep invisible)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Native libraries (keep)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> HAL (keep)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Kernel (keep)</div>
+  </div>
+
+  <div class="diagram">
+
+    <!-- LAYER 1: Our stuff -->
+    <div class="layer l-ours">
+      <div class="layer-header">
+        <span>AIPhone OS Layer</span>
+        <span class="tag-ours">OUR CODE</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>AIPhoneHome</strong><small>AI chat UI<br>plain HTML/JS</small></div>
+        <div class="box"><strong>Capability Broker</strong><small>Permission enforcement<br>audit log</small></div>
+        <div class="box"><strong>AI Service</strong><small>App generation<br>intent routing</small></div>
+        <div class="box"><strong>Generated TWAs</strong><small>User's apps<br>sandboxed WebViews</small></div>
+      </div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 2: App Runtime -->
+    <div class="layer l-runtime">
+      <div class="layer-header">
+        <span>Application Runtime</span>
+        <span class="tag-keep">KEEP</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>Vanadium</strong><small>Hardened Chromium<br>(V8 + Blink + WebGPU)</small></div>
+        <div class="box"><strong>ART</strong><small>Android Runtime<br>runs system services</small></div>
+        <div class="box"><strong>Zygote</strong><small>Process spawner<br>app forking</small></div>
+      </div>
+      <div class="note">Vanadium IS our TWA runtime. ART runs system services only — no third-party APKs.</div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 3: System Apps -->
+    <div class="layer l-ours">
+      <div class="layer-header">
+        <span>System Apps</span>
+        <span></span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>Dialer</strong><small>Phone calls<br><span class="tag-keep">KEEP</span></small></div>
+        <div class="box"><strong>Messaging</strong><small>SMS<br><span class="tag-keep">KEEP</span></small></div>
+        <div class="box"><strong>Camera</strong><small>Photo/video<br><span class="tag-keep">KEEP</span></small></div>
+        <div class="box"><strong>Contacts</strong><small>Address book<br><span class="tag-keep">KEEP</span></small></div>
+        <div class="box"><strong>Settings</strong><small>WiFi, BLE, etc<br><span class="tag-keep">KEEP</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Calculator</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Calendar</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Gallery</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Clock</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Files</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>PDF Viewer</strong><small><span class="tag-strip">REMOVE</span></small></div>
+        <div class="box" style="opacity:0.4"><strong>Launcher</strong><small><span class="tag-strip">REPLACED</span></small></div>
+      </div>
+      <div class="note">Removed apps become AI-generated TWAs. Launcher replaced by AIPhoneHome.</div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 4: Android Framework -->
+    <div class="layer l-framework">
+      <div class="layer-header">
+        <span>Android Framework (Java API)</span>
+        <span class="tag-hide">KEEP INVISIBLE</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>ActivityManager</strong><small>App lifecycle<br>process management</small></div>
+        <div class="box"><strong>WindowManager</strong><small>Window compositing<br>input routing</small></div>
+        <div class="box"><strong>PackageManager</strong><small>App install/removal<br>permissions</small></div>
+        <div class="box"><strong>NotificationManager</strong><small>System notifications<br>status bar</small></div>
+        <div class="box"><strong>TelephonyManager</strong><small>Calls, SMS<br>cellular data</small></div>
+        <div class="box"><strong>LocationManager</strong><small>GPS, network<br>geofencing</small></div>
+        <div class="box"><strong>ConnectivityManager</strong><small>WiFi, cellular<br>network state</small></div>
+        <div class="box"><strong>BluetoothManager</strong><small>BLE scan/connect<br>peripheral mode</small></div>
+        <div class="box"><strong>CameraManager</strong><small>Camera access<br>photo/video capture</small></div>
+        <div class="box"><strong>SensorManager</strong><small>Accelerometer, gyro<br>barometer, proximity</small></div>
+        <div class="box"><strong>AudioManager</strong><small>Audio routing<br>volume control</small></div>
+        <div class="box"><strong>NfcManager</strong><small>NFC read/write<br>tag discovery</small></div>
+        <div class="box"><strong>UsbManager</strong><small>USB host mode<br>device detection</small></div>
+        <div class="box"><strong>PowerManager</strong><small>Wake locks<br>battery optimization</small></div>
+        <div class="box"><strong>AlarmManager</strong><small>Scheduled tasks<br>wake-up alarms</small></div>
+        <div class="box"><strong>ContentResolver</strong><small>Contacts, calendar<br>media store</small></div>
+      </div>
+      <div class="note">The Capability Broker calls these Java APIs on behalf of TWAs. Users never see this layer. It's the plumbing — invisible but required.</div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 5: Native Libraries -->
+    <div class="layer l-native">
+      <div class="layer-header">
+        <span>Native Libraries (C/C++)</span>
+        <span class="tag-keep">KEEP</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>SurfaceFlinger</strong><small>Display compositor<br>frame rendering</small></div>
+        <div class="box"><strong>AudioFlinger</strong><small>Audio mixing<br>output routing</small></div>
+        <div class="box"><strong>CameraService</strong><small>Camera pipeline<br>ISP control</small></div>
+        <div class="box"><strong>Skia</strong><small>2D graphics<br>GPU rendering</small></div>
+        <div class="box"><strong>OpenGL ES / Vulkan</strong><small>3D graphics<br>GPU compute</small></div>
+        <div class="box"><strong>SQLite</strong><small>Database engine<br>app storage</small></div>
+        <div class="box"><strong>libc (Bionic)</strong><small>C standard library<br>POSIX subset</small></div>
+        <div class="box"><strong>libcrypto / libssl</strong><small>BoringSSL<br>TLS, encryption</small></div>
+        <div class="box"><strong>Media Framework</strong><small>Codecs, playback<br>recording</small></div>
+        <div class="box"><strong>Netd</strong><small>Network daemon<br>DNS, firewall, routing</small></div>
+      </div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 6: HAL -->
+    <div class="layer l-hal">
+      <div class="layer-header">
+        <span>Hardware Abstraction Layer (HAL)</span>
+        <span class="tag-keep">KEEP</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>Camera HAL</strong><small>Tensor G3 ISP<br>image processing</small></div>
+        <div class="box"><strong>Audio HAL</strong><small>Speaker, mic<br>audio codec</small></div>
+        <div class="box"><strong>Bluetooth HAL</strong><small>BLE radio<br>profiles</small></div>
+        <div class="box"><strong>WiFi HAL</strong><small>WiFi chipset<br>scanning, connect</small></div>
+        <div class="box"><strong>Graphics HAL (IMG)</strong><small>Imagination GPU<br>Vulkan driver</small></div>
+        <div class="box"><strong>Sensors HAL</strong><small>Accel, gyro, baro<br>proximity, light</small></div>
+        <div class="box"><strong>GNSS HAL</strong><small>GPS, GLONASS<br>location</small></div>
+        <div class="box"><strong>NFC HAL</strong><small>NFC controller<br>tag I/O</small></div>
+        <div class="box"><strong>Power HAL</strong><small>CPU governors<br>thermal mgmt</small></div>
+        <div class="box"><strong>Telephony RIL</strong><small>Radio Interface<br>baseband comms</small></div>
+        <div class="box"><strong>USB HAL</strong><small>USB controller<br>host/device mode</small></div>
+        <div class="box"><strong>Fingerprint HAL</strong><small>Under-display<br>sensor</small></div>
+      </div>
+      <div class="note">HALs are binary blobs from Google/Qualcomm. We can't modify them. They bridge Linux kernel drivers to the Android framework above.</div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 7: Kernel -->
+    <div class="layer l-kernel">
+      <div class="layer-header">
+        <span>Linux Kernel (6.1 / GKI)</span>
+        <span class="tag-keep">KEEP</span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>Process Mgmt</strong><small>Scheduling<br>isolation</small></div>
+        <div class="box"><strong>Memory Mgmt</strong><small>Virtual memory<br>paging, cgroups</small></div>
+        <div class="box"><strong>Networking</strong><small>TCP/IP stack<br>netfilter, eBPF</small></div>
+        <div class="box"><strong>Binder IPC</strong><small>Android's IPC<br>process comms</small></div>
+        <div class="box"><strong>SELinux</strong><small>Mandatory access<br>control</small></div>
+        <div class="box"><strong>dm-verity</strong><small>Verified boot<br>partition integrity</small></div>
+        <div class="box"><strong>Device Drivers</strong><small>Tensor G3 SoC<br>all peripherals</small></div>
+        <div class="box"><strong>Power Mgmt</strong><small>Sleep, wake<br>CPU freq scaling</small></div>
+      </div>
+    </div>
+
+    <div class="arrow">&darr;</div>
+
+    <!-- LAYER 8: Hardware -->
+    <div class="layer l-hw">
+      <div class="layer-header">
+        <span>Hardware (Google Pixel 8 / Tensor G3)</span>
+        <span></span>
+      </div>
+      <div class="layer-body">
+        <div class="box"><strong>Tensor G3 SoC</strong><small>CPU + GPU + TPU<br>+ ISP + modem</small></div>
+        <div class="box"><strong>Camera</strong><small>50MP main<br>12MP ultrawide</small></div>
+        <div class="box"><strong>Display</strong><small>6.2" OLED<br>120Hz, 2400x1080</small></div>
+        <div class="box"><strong>Cellular</strong><small>5G modem<br>eSIM + nano SIM</small></div>
+        <div class="box"><strong>WiFi 7</strong><small>802.11be<br>2.4/5/6 GHz</small></div>
+        <div class="box"><strong>Bluetooth 5.3</strong><small>BLE, LE Audio<br>dual antenna</small></div>
+        <div class="box"><strong>NFC</strong><small>Reader/writer<br>peer-to-peer</small></div>
+        <div class="box"><strong>USB-C</strong><small>USB 3.2<br>host mode</small></div>
+        <div class="box"><strong>Sensors</strong><small>Accel, gyro, baro<br>proximity, light, mag</small></div>
+        <div class="box"><strong>Titan M2</strong><small>Security chip<br>verified boot, keys</small></div>
+      </div>
+    </div>
+
+  </div>
+
+  <h2>Data Flow: "Make me a timer"</h2>
+  <p>When the user says "make me a timer," here's how it flows through the stack:</p>
+  <ol>
+    <li><strong>AIPhoneHome</strong> (WebView) receives the text input</li>
+    <li><strong>AI Service</strong> sends the prompt to Claude API (cloud)</li>
+    <li>Claude generates HTML/CSS/JS for a timer app</li>
+    <li><strong>Capability Broker</strong> performs static analysis on the generated code</li>
+    <li>User approves permissions (storage, notifications)</li>
+    <li>App is installed as a TWA in the local app store</li>
+    <li>User taps to open — a new <strong>Vanadium</strong> WebView process loads the HTML</li>
+    <li>Timer uses <code>aiphone.notifications.schedule()</code> which goes through the <strong>Capability Broker</strong></li>
+    <li>Broker calls <strong>AlarmManager</strong> (Android Framework) to schedule the alarm</li>
+    <li>AlarmManager uses <strong>Power HAL</strong> to set a kernel wakeup timer</li>
+    <li>Kernel wakes the <strong>Tensor G3 CPU</strong> at the scheduled time</li>
+    <li><strong>NotificationManager</strong> shows the notification via <strong>SurfaceFlinger</strong> on the <strong>OLED display</strong></li>
+  </ol>
+
+  <h2>Data Flow: Camera Access</h2>
+  <p>When a generated app calls <code>aiphone.camera.capture()</code>:</p>
+  <ol>
+    <li>JavaScript in the TWA's WebView calls <code>window.aiphone.camera.capture()</code></li>
+    <li><strong>Capability Broker</strong> checks: does this app have camera permission? Is it user-approved?</li>
+    <li>If yes: Broker calls <strong>CameraManager</strong> (Android Framework)</li>
+    <li>CameraManager talks to <strong>CameraService</strong> (native C++ daemon)</li>
+    <li>CameraService talks to <strong>Camera HAL</strong> (vendor binary)</li>
+    <li>Camera HAL controls the <strong>Tensor G3 ISP</strong> (image signal processor) and <strong>camera sensor</strong></li>
+    <li>Photo data flows back up the stack to the WebView as a Blob</li>
+    <li><strong>Audit log</strong> records: app X used camera at time Y, result: success, size: Z bytes</li>
+  </ol>
+
+  <h2>What Makes This Different From Stock Android</h2>
+  <table>
+    <tr><th>Layer</th><th>Stock Android</th><th>AIPhone OS</th></tr>
+    <tr><td>Top layer</td><td>App grid launcher + Google apps</td><td>AI chat + generated TWAs</td></tr>
+    <tr><td>App format</td><td>APKs (Java/Kotlin)</td><td>TWAs (HTML/JS in WebView)</td></tr>
+    <tr><td>App source</td><td>Play Store download</td><td>AI-generated on device</td></tr>
+    <tr><td>Hardware access</td><td>Via Android SDK (Java)</td><td>Via Capability Broker (JS bridge)</td></tr>
+    <tr><td>Permissions</td><td>Per-app, revocable</td><td>5-tier, audited, rollback</td></tr>
+    <tr><td>Framework</td><td>Core of the UX</td><td>Invisible plumbing</td></tr>
+    <tr><td>Google services</td><td>GMS, Play Services, Firebase</td><td>None</td></tr>
+  </table>
+
+  <div class="page-nav">
+    <a href="stack.html">&larr; System Architecture</a>
+    <a href="comparison.html">vs iOS / Android &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

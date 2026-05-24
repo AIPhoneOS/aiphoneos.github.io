@@ -6,6 +6,7 @@ const NAV = [
     { title: 'Vision & Thesis', href: 'index.html' },
     { title: 'Founding Story', href: 'founding-story.html' },
     { title: 'System Architecture', href: 'stack.html' },
+    { title: 'Android Module Map', href: 'android-architecture.html' },
     { title: 'vs iOS / Android', href: 'comparison.html' },
     { title: 'vs AI App Generators', href: 'competitors.html' },
   ]},
