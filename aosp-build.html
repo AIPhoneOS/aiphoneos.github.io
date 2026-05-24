@@ -7,37 +7,49 @@
 <div class="layout"><nav class="sidebar"></nav><div class="main">
 
   <h1>AOSP Build Research</h1>
-  <p class="subtitle">How to actually build a minimal AOSP image for Pixel 8</p>
+  <p class="subtitle">How the build works — raw AOSP vs our GrapheneOS-based approach</p>
 
-  <h2>Pixel 8 (shiba) Build Target</h2>
-  <p>Google documents the Pixel 8 AOSP build process. Key facts:</p>
-  <ul>
-    <li><strong>Codename:</strong> shiba</li>
-    <li><strong>Build target:</strong> <code>aosp_shiba-userdebug</code></li>
-    <li><strong>Recommended branch:</strong> <code>android-latest-release</code> (as of March 2025, Google recommends this over <code>aosp-main</code>)</li>
-    <li><strong>Vendor blobs:</strong> Google no longer provides separate vendor blob archives. Proprietary blobs are on the <code>/vendor</code> partition and must be extracted from factory images.</li>
-    <li><strong>Extraction tool:</strong> <a href="https://github.com/AOSPAlliance/android-prepare-vendor" target="_blank" rel="noopener">android-prepare-vendor</a> automates extracting vendor blobs from factory images</li>
-  </ul>
+  <h2>Pixel 8 (shiba) Build Targets</h2>
+  <table>
+    <tr><th></th><th>Raw AOSP</th><th>GrapheneOS (our approach)</th></tr>
+    <tr><td>Manifest</td><td><code>android.googlesource.com/platform/manifest</code></td><td><code>github.com/GrapheneOS/platform_manifest</code></td></tr>
+    <tr><td>Branch</td><td><code>android-latest-release</code></td><td><code>16-qpr2</code> (Android 16 QPR2)</td></tr>
+    <tr><td>Lunch target</td><td><code>aosp_shiba-userdebug</code></td><td><code>shiba</code></td></tr>
+    <tr><td>Vendor blobs</td><td>Extract from factory image manually</td><td>Handled by GrapheneOS build system</td></tr>
+    <tr><td>Vanadium</td><td>Not included (stock WebView)</td><td>Included (hardened Chromium)</td></tr>
+    <tr><td>Security hardening</td><td>Stock AOSP</td><td>Hardened allocator, MTE, CFI, PAC</td></tr>
+  </table>
 
-  <h2>Build Process Overview</h2>
-  <pre><code># 1. Sync AOSP source (~100GB, 2-4 hours)
-repo init -u https://android.googlesource.com/platform/manifest \
-  -b android-latest-release --depth=1
-repo sync -c -j$(nproc) --no-tags
+  <h2>Our Build Process (GrapheneOS-based)</h2>
+  <pre><code># 1. Sync GrapheneOS source (~118GB, 2-4 hours)
+repo init -u https://github.com/GrapheneOS/platform_manifest.git \
+  -b 16-qpr2
+repo sync -c -j$(nproc) --no-tags --force-sync
 
-# 2. Extract vendor blobs from Pixel 8 factory image
-# Download factory image from developers.google.com/android/images
-# Use android-prepare-vendor to extract
+# 2. Apply our overlay (AIPhoneHome + device config)
+./overlay/apply-overlay.sh
 
 # 3. Set up build environment
 source build/envsetup.sh
-lunch aosp_shiba-userdebug
+lunch shiba
 
 # 4. Build
 m -j$(nproc)
 
-# 5. Flash to device
+# 5. Flash to Pixel 8
+# Boot to bootloader: adb reboot bootloader
 fastboot flashall -w</code></pre>
+
+  <h2>Raw AOSP Build (for reference)</h2>
+  <pre><code># If building from raw AOSP instead of GrapheneOS:
+repo init -u https://android.googlesource.com/platform/manifest \
+  -b android-latest-release
+repo sync -c -j$(nproc) --no-tags
+# Extract vendor blobs from factory image
+# Use android-prepare-vendor to extract
+source build/envsetup.sh
+lunch aosp_shiba-userdebug
+m -j$(nproc)</code></pre>
 
   <h2>What We Can Strip</h2>
   <p>AOSP build is configured via <code>PRODUCT_PACKAGES</code> in product makefiles. Removing apps is straightforward:</p>

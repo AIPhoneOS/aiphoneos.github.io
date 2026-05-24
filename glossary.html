@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Glossary — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.term { margin: 14px 0; padding: 12px 14px; background: var(--surface); border-radius: 8px; border-left: 3px solid var(--accent); }
+.term dt { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.term dd { font-size: 13px; color: var(--text); margin: 0; }
+.term dd a { font-size: 12px; }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>Glossary</h1>
+  <p class="subtitle">Every term used in this knowledge base, defined in one place</p>
+
+  <dl>
+  <div class="term"><dt>AOSP</dt><dd>Android Open Source Project. The open-source code that Android is built from. Google publishes it; anyone can modify and build their own OS from it. We use it via GrapheneOS. <a href="foundation.html">More</a></dd></div>
+
+  <div class="term"><dt>ART</dt><dd>Android Runtime. The Java/Kotlin virtual machine that runs Android system services. In our OS, ART runs system services only — no third-party apps use it. Invisible to the user.</dd></div>
+
+  <div class="term"><dt>Blink</dt><dd>The rendering engine inside Chromium/Vanadium. Parses HTML, lays out CSS, paints pixels. Part of our TWA runtime. <a href="runtime.html">More</a></dd></div>
+
+  <div class="term"><dt>Capability Broker</dt><dd>Our security boundary. A Java service that sits between web app JavaScript and Android system APIs. Every hardware/system call goes through it: checks manifest, checks user permission, enforces, logs to audit trail. <a href="broker.html">API docs</a> / <a href="capabilities.html">Tier system</a></dd></div>
+
+  <div class="term"><dt>Capability Tier</dt><dd>One of 5 levels of system access (Tier 0 = automatic, Tier 4 = kernel-adjacent). Each tier requires increasing levels of user approval. <a href="capabilities.html">Full breakdown</a></dd></div>
+
+  <div class="term"><dt>CSP</dt><dd>Content Security Policy. HTTP headers that restrict what a web page can do (e.g., block eval(), block external scripts). We enforce strict CSP on all generated TWAs.</dd></div>
+
+  <div class="term"><dt>GMS</dt><dd>Google Mobile Services. Google's proprietary apps and APIs (Play Store, Play Services, Firebase, Maps API, FCM push). We don't use GMS. GrapheneOS ships without it.</dd></div>
+
+  <div class="term"><dt>GrapheneOS</dt><dd>Privacy-focused mobile OS based on AOSP, targeting Pixel phones. Our base distribution. Provides Vanadium, hardened memory allocator, hardened kernel, per-app network/sensor permissions, and monthly security patches. <a href="grapheneos.html">Full details</a></dd></div>
+
+  <div class="term"><dt>HAL</dt><dd>Hardware Abstraction Layer. Binary interface between Android framework and hardware drivers. Each hardware component (camera, BLE, WiFi, GPS, GPU) has a HAL. These are vendor-provided binaries we cannot modify. <a href="android-architecture.html">Module map</a></dd></div>
+
+  <div class="term"><dt>Halium</dt><dd>Compatibility layer that bridges Android HAL drivers into a standard Linux userspace. Used by Ubuntu Touch and Droidian. No Pixel 8 port exists. <a href="foundation.html">Research</a></dd></div>
+
+  <div class="term"><dt>LTO</dt><dd>Link-Time Optimization. Compiler technique that optimizes across compilation units at link time. GrapheneOS mandates LTO for security (enables CFI). Very memory-intensive — needs 32GB+ RAM to build.</dd></div>
+
+  <div class="term"><dt>MTE</dt><dd>Memory Tagging Extension. ARM hardware feature on Tensor G3 that tags memory allocations to detect use-after-free and buffer overflow bugs at runtime. GrapheneOS enables this.</dd></div>
+
+  <div class="term"><dt>Pixel 8 (shiba)</dt><dd>Our target hardware. Google Pixel 8, codename "shiba." Tensor G3 SoC with TPU for on-device AI. Unlockable bootloader for custom OS flashing.</dd></div>
+
+  <div class="term"><dt>SurfaceFlinger</dt><dd>Android's display compositor. Takes rendered frames from all apps and composites them onto the screen. Native C++ daemon. Required for any display output.</dd></div>
+
+  <div class="term"><dt>Tensor G3</dt><dd>Google's custom SoC in Pixel 8. Includes CPU, GPU (Imagination), TPU (for AI inference), ISP (image signal processor), and 5G modem. All drivers are Android-specific.</dd></div>
+
+  <div class="term"><dt>TWA</dt><dd>Trusted Web App. Our app format. A signed HTML/CSS/JS bundle with a capability manifest, version history, audit trail, and sandboxed storage. The ONLY app format on AIPhone OS. Not the same as Android's "Trusted Web Activity." <a href="twa.html">Full spec</a></dd></div>
+
+  <div class="term"><dt>UnifiedPush</dt><dd>Open protocol for push notifications without Google FCM. Our planned replacement for Google's push notification infrastructure. <a href="lifecycle.html">App lifecycle</a></dd></div>
+
+  <div class="term"><dt>V8</dt><dd>Google's JavaScript engine. Compiles JS to native machine code. Part of Chromium/Vanadium. Executes all TWA app code. <a href="runtime.html">Runtime decision</a></dd></div>
+
+  <div class="term"><dt>Vanadium</dt><dd>GrapheneOS's hardened fork of Chromium. Our TWA runtime engine. Includes V8 (JS), Blink (rendering), Skia (graphics), WebGPU. Pre-built and maintained by the GrapheneOS team. <a href="grapheneos.html">Details</a></dd></div>
+
+  <div class="term"><dt>WebGPU</dt><dd>Modern web API for GPU compute and rendering. Successor to WebGL. Supported in Chromium/Vanadium on Android. Potential path for on-device AI inference in the browser runtime. <a href="on-device-ai.html">AI research</a></dd></div>
+
+  <div class="term"><dt>Zygote</dt><dd>Android process that pre-loads common framework classes and forks to create new app processes. All Android apps (including our WebView) start as Zygote forks. GrapheneOS optionally replaces this with exec spawning for better isolation.</dd></div>
+  </dl>
+
+  <div class="page-nav">
+    <a href="research.html">&larr; Research</a>
+    <span></span>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>

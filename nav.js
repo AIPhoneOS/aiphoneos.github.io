@@ -44,6 +44,7 @@ const NAV = [
     { title: 'OS Build Paths', href: 'os-paths.html' },
     { title: 'Build Phases', href: 'buildpath.html' },
     { title: 'Research & Links', href: 'research.html' },
+    { title: 'Glossary', href: 'glossary.html' },
   ]},
 ];
 
@@ -81,7 +82,7 @@ function initNav() {
   });
 
   html += `<div class="sidebar-meta">
-    <p>v0.5 &middot; 27 pages</p>
+    <p>v0.6 &middot; 30 pages</p>
     <p class="wn">* working name &mdash; requires trademark clearance</p>
   </div>`;
 

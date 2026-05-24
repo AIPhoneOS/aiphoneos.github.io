@@ -7,7 +7,7 @@
 <div class="layout"><nav class="sidebar"></nav><div class="main">
 
   <h1>System Architecture</h1>
-  <p class="subtitle">The full OS stack from kernel to user experience</p>
+  <p class="subtitle">The full OS stack from kernel to user experience, built on <a href="grapheneos.html">GrapheneOS</a></p>
 
   <div class="stack-diagram">
     <div class="stack-layer"><div><div class="stack-layer-name">System UX (TWAs)</div><div class="stack-layer-detail">Home | Gallery | Settings | Phone | Browser</div></div><span class="badge badge-wip">building</span></div>
@@ -15,7 +15,7 @@
     <div class="stack-layer"><div><div class="stack-layer-name">AI System Service</div><div class="stack-layer-detail">App generation | Intent routing | Workflows</div></div><span class="badge badge-planned">phase 1</span></div>
     <div class="stack-layer"><div><div class="stack-layer-name">Capability Broker</div><div class="stack-layer-detail">Permission enforcement | Audit log | API mediation</div></div><span class="badge badge-wip">building</span></div>
     <div class="stack-layer"><div><div class="stack-layer-name">TWA Runtime</div><div class="stack-layer-detail">Chromium Content Shell: V8 + Blink + WebGPU</div></div><span class="badge badge-planned">phase 1</span></div>
-    <div class="stack-layer"><div><div class="stack-layer-name">Minimal AOSP System Services</div><div class="stack-layer-detail">Telephony | Connectivity | Power | Audio | Display</div></div><span class="badge badge-planned">phase 1</span></div>
+    <div class="stack-layer"><div><div class="stack-layer-name">GrapheneOS + AOSP System Services</div><div class="stack-layer-detail">Telephony | Connectivity | Power | Audio | Display</div></div><span class="badge badge-planned">phase 1</span></div>
     <div class="stack-layer"><div><div class="stack-layer-name">HALs + Drivers</div><div class="stack-layer-detail">Camera | GPU | Radio | Sensors | Display | Storage</div></div><span class="badge badge-done">aosp</span></div>
     <div class="stack-layer"><div><div class="stack-layer-name">Linux Kernel</div><div class="stack-layer-detail">Processes | Memory | Networking | Security | Power</div></div><span class="badge badge-done">aosp</span></div>
   </div>
@@ -29,7 +29,7 @@
     <li><strong>Transparency is a feature.</strong> Every privileged action is logged and visible to the user.</li>
   </ul>
 
-  <h2>What We Strip From AOSP</h2>
+  <h2>What We Strip From GrapheneOS/AOSP</h2>
   <table>
     <tr><th>Removed</th><th>Reason</th></tr>
     <tr><td>Stock apps, launcher, settings</td><td>Replaced by our TWA system apps</td></tr>
@@ -38,7 +38,7 @@
     <tr><td>Google Mobile Services (GMS)</td><td>No Google dependency</td></tr>
   </table>
 
-  <h2>What We Keep From AOSP</h2>
+  <h2>What We Keep From GrapheneOS/AOSP</h2>
   <table>
     <tr><th>Kept</th><th>Reason</th></tr>
     <tr><td>Linux kernel + device drivers</td><td>Only kernel with mobile hardware support</td></tr>
