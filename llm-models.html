@@ -115,8 +115,8 @@
     <strong>Intent Router:</strong> Gemma 3 1B (720MB, always loaded, ~200ms response)<br>
     <strong>App Generator:</strong> Phi-4 Mini 3.8B (2.5GB, loaded on demand, ~15-25 sec)<br>
     <strong>Cloud Fallback:</strong> Claude Sonnet (complex apps), Claude Haiku (simple queries)<br>
-    <strong>Runtime:</strong> llama.cpp (C/C++, GGUF format)<br>
-    <strong>Compute:</strong> Vulkan GPU (primary) + NNAPI TPU (secondary). CPU never used for inference — reserved for UI.
+    <strong>Runtime:</strong> LiteRT-LM (C++ core, Java API, Apache 2.0). <a href="llm-framework.html">Decision rationale</a><br>
+    <strong>Compute:</strong> OpenCL GPU (primary, 52 t/s) + NPU/TPU (secondary). CPU reserved for UI only.
   </blockquote>
 
   <h2>Sources</h2>

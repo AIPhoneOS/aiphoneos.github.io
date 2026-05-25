@@ -25,7 +25,7 @@
 
   <table>
     <tr><th>Runtime</th><th>What it runs</th><th>Pixel 8 support</th><th>Our use case</th></tr>
-    <tr><td><strong>llama.cpp</strong></td><td>GGUF-quantized LLMs</td><td style="color:var(--green)">Yes (CPU + NEON)</td><td>Intent routing, simple classification</td></tr>
+    <tr><td><strong>LiteRT-LM</strong></td><td>Gemma, Phi-4, Llama, Qwen</td><td style="color:var(--green)">Yes (OpenCL GPU, NPU)</td><td>Intent routing, app generation, queries</td></tr>
     <tr><td><strong>ONNX Runtime</strong></td><td>ONNX models</td><td style="color:var(--green)">Yes (CPU, NNAPI)</td><td>Embeddings, small classifiers</td></tr>
     <tr><td><strong>MediaPipe</strong></td><td>Google's ML tasks</td><td style="color:var(--green)">Yes</td><td>Object detection, hand tracking</td></tr>
     <tr><td><strong>WebGPU (in Chromium)</strong></td><td>GPU-accelerated inference</td><td style="color:var(--yellow)">Partial (Chrome 121+, Android 12+)</td><td>In-browser model inference</td></tr>
@@ -34,9 +34,10 @@
 
   <h3>Practical plan</h3>
   <ul>
-    <li><strong>Phase 1-2:</strong> Cloud only (Claude API). No local inference. Simple and reliable.</li>
-    <li><strong>Phase 3:</strong> Add llama.cpp with a small model (Phi-3-mini or similar, ~2B params) for offline intent routing: "is the user asking to create an app, modify an app, or ask a question?"</li>
-    <li><strong>Phase 4+:</strong> Evaluate WebGPU inference for in-app AI queries, ONNX for embeddings/search.</li>
+    <li><strong>Phase 1:</strong> Cloud only (Claude API). No local inference. Simple and reliable.</li>
+    <li><strong>Phase 2:</strong> Add LiteRT-LM with Gemma 1B (720MB) for local intent routing on GPU. Cloud for generation.</li>
+    <li><strong>Phase 3:</strong> Add Phi-4 Mini (2.5GB) for local app generation on GPU. Cloud as fallback for complex apps.</li>
+    <li><strong>Phase 4+:</strong> Fully offline capable. Local embeddings for search. See <a href="llm-framework.html">Framework Decision</a> for details.</li>
   </ul>
 
   <h2>Apple's Foundation Models</h2>
@@ -61,7 +62,7 @@
     <li><a href="https://www.androidauthority.com/gemini-nano-features-devices-3490062/" target="_blank" rel="noopener">Gemini Nano features and supported devices</a></li>
     <li><a href="https://developer.apple.com/documentation/FoundationModels" target="_blank" rel="noopener">Apple Foundation Models</a></li>
     <li><a href="https://arxiv.org/pdf/2308.16734" target="_blank" rel="noopener">Native vs Web Apps: Energy Consumption comparison</a></li>
-    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp</a></li>
+    <li><a href="https://ai.google.dev/edge/litert-lm/overview" target="_blank" rel="noopener">LiteRT-LM — Google AI Edge</a></li>
   </ul>
 
   <div class="page-nav">

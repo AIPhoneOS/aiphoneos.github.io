@@ -88,7 +88,7 @@ function initNav() {
   });
 
   html += `<div class="sidebar-meta">
-    <p>v0.7 &middot; 32 pages</p>
+    <p>v0.8 &middot; 34 pages</p>
     <p class="wn">* working name &mdash; requires trademark clearance</p>
   </div>`;
 

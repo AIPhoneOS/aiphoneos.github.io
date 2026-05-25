@@ -139,7 +139,7 @@
     <h4>AiService — The AI Control Module</h4>
     <pre><code>AiService (Android Foreground Service)
 ├── ModelManager
-│   ├── load(modelPath, backend)     // mmap GGUF, init llama.cpp
+│   ├── load(modelPath, backend)     // load model via LiteRT-LM
 │   ├── unload()                      // free memory
 │   ├── isLoaded()                    // check state
 │   └── getMemoryUsage()             // monitor RAM
@@ -161,10 +161,10 @@
 │   ├── classify(text, categories)    // classification
 │   └── extract(text, schema)         // structured extraction
 │
-└── InferenceEngine (llama.cpp wrapper)
-    ├── init(ggufPath, params)        // load model
-    ├── complete(prompt, maxTokens)   // generate text
-    ├── tokenize(text)                // count tokens
+└── InferenceEngine (LiteRT-LM wrapper)
+    ├── init(modelDir, backend)       // load model via LiteRT-LM
+    ├── generate(prompt, maxTokens)   // generate text
+    ├── generateStreaming(prompt, cb) // stream tokens
     ├── setBackend(opencl|npu|cpu)    // GPU first, NPU second, CPU last resort
     └── abort()                       // cancel generation</code></pre>
   </div>
@@ -229,13 +229,12 @@ AiService (Java) → LiteRT-LM Java API → liblitert_lm.so → GPU (OpenCL) / N
 
   <h2>Sources</h2>
   <ul>
-    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp — GitHub</a></li>
+    <li><a href="https://ai.google.dev/edge/litert-lm/overview" target="_blank" rel="noopener">LiteRT-LM Overview — Google AI Edge</a></li>
+    <li><a href="https://developers.googleblog.com/blazing-fast-on-device-genai-with-litert-lm/" target="_blank" rel="noopener">Blazing Fast On-Device GenAI with LiteRT-LM</a></li>
+    <li><a href="https://arxiv.org/html/2403.11805v1" target="_blank" rel="noopener">LLM as a System Service on Mobile Devices</a></li>
     <li><a href="https://www.promptquorum.com/power-local-llm/mobile-llm-models-phi4-gemma-smollm" target="_blank" rel="noopener">Best Mobile LLM Models 2026: Phi-4 vs Gemma 3 vs SmolLM</a></li>
     <li><a href="https://localaimaster.com/blog/small-language-models-guide-2026" target="_blank" rel="noopener">Best Small Language Models 2026: 12 SLMs for 8GB RAM</a></li>
-    <li><a href="https://mvpfactory.io/blog/on-device-llm-inference-via-kmp-and-llama-cpp-memory-mapped-model-loading-ane" target="_blank" rel="noopener">On-Device LLM Inference via llama.cpp: Memory-Mapped Loading</a></li>
-    <li><a href="https://github.com/ggml-org/llama.cpp/discussions/9464" target="_blank" rel="noopener">llama.cpp Vulkan on Android GPU — Performance Discussion</a></li>
     <li><a href="https://arxiv.org/html/2410.03613v3" target="_blank" rel="noopener">Large Language Models on Mobile Devices: Performance Study</a></li>
-    <li><a href="https://github.com/a-ghorbani/pocketpal-ai" target="_blank" rel="noopener">PocketPal AI — Reference Android LLM app</a></li>
   </ul>
 
   <div class="page-nav">

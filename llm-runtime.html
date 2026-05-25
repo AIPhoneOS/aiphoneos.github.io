@@ -7,82 +7,76 @@
 <div class="layout"><nav class="sidebar"></nav><div class="main">
 
   <h1>Inference Runtime</h1>
-  <p class="subtitle">How LLM inference actually runs on Pixel 8 hardware</p>
+  <p class="subtitle">How LLM inference runs on Pixel 8 without touching the CPU</p>
+
+  <h2>Core Principle</h2>
+  <blockquote>CPU is for the user. GPU/TPU is for the LLM. They never compete. The UI stays at 120fps while the LLM generates in the background on separate hardware.</blockquote>
 
   <h2>Runtime Options Evaluated</h2>
   <table>
-    <tr><th>Runtime</th><th>Language</th><th>GPU support</th><th>Model format</th><th>Android?</th><th>Verdict</th></tr>
+    <tr><th>Runtime</th><th>Language</th><th>GPU</th><th>NPU/TPU</th><th>Android?</th><th>Verdict</th></tr>
     <tr style="background:var(--green)08">
-      <td><strong>llama.cpp</strong></td><td>C/C++</td><td>Vulkan, NNAPI</td><td>GGUF</td>
-      <td style="color:var(--green)">Yes (NDK)</td>
+      <td><strong>LiteRT-LM</strong></td><td>C++, Java API</td><td style="color:var(--green)">OpenCL — 52 t/s</td><td style="color:var(--green)">Built-in</td>
+      <td style="color:var(--green)">Yes</td>
       <td><span class="badge badge-done">chosen</span></td>
     </tr>
     <tr>
-      <td>MLC LLM</td><td>C++/Python</td><td>OpenCL, Vulkan</td><td>Custom</td>
-      <td style="color:var(--yellow)">Yes but slow on Pixel</td>
-      <td>CPU-only on Tensor G3</td>
+      <td>llama.cpp</td><td>C/C++</td><td style="color:var(--yellow)">Vulkan — ~15-25 t/s</td><td style="color:var(--yellow)">NNAPI (experimental)</td>
+      <td style="color:var(--green)">Yes (NDK)</td>
+      <td>Good fallback, slower GPU</td>
     </tr>
     <tr>
-      <td>ONNX Runtime</td><td>C++</td><td>NNAPI, XNNPACK</td><td>ONNX</td>
+      <td>MLC LLM</td><td>C++/Python</td><td style="color:var(--yellow)">OpenCL, Vulkan</td><td style="color:var(--red)">CPU-only on Pixel</td>
+      <td style="color:var(--yellow)">Yes but slow on Tensor</td>
+      <td>CPU-only on our hardware</td>
+    </tr>
+    <tr>
+      <td>ExecuTorch</td><td>C++</td><td style="color:var(--yellow)">XNNPACK, Vulkan</td><td style="color:var(--green)">NPU, DSP</td>
+      <td style="color:var(--yellow)">Maturing</td>
+      <td>Promising, not production yet</td>
+    </tr>
+    <tr>
+      <td>MediaPipe LLM</td><td>C++/Java</td><td style="color:var(--green)">GPU delegate</td><td style="color:var(--green)">Via AICore</td>
       <td style="color:var(--green)">Yes</td>
-      <td>Good for embeddings, not LLMs</td>
-    </tr>
-    <tr>
-      <td>MediaPipe LLM</td><td>C++/Java</td><td>GPU delegate</td><td>TFLite</td>
-      <td style="color:var(--green)">Yes</td>
-      <td>Tied to Google ecosystem</td>
-    </tr>
-    <tr>
-      <td>TensorFlow Lite</td><td>C++/Java</td><td>GPU, NNAPI</td><td>TFLite</td>
-      <td style="color:var(--green)">Yes</td>
-      <td>Not optimized for LLM inference</td>
-    </tr>
-    <tr>
-      <td>ExecuTorch (Meta)</td><td>C++</td><td>XNNPACK, Vulkan</td><td>Custom</td>
-      <td style="color:var(--yellow)">Early</td>
-      <td>Promising but immature</td>
+      <td style="color:var(--red)">AICore needs GMS</td>
     </tr>
   </table>
 
-  <h2>Why llama.cpp</h2>
+  <h2>Why LiteRT-LM</h2>
+  <p>See <a href="llm-framework.html">Framework Decision</a> for the full comparison. Summary:</p>
   <ul>
-    <li><strong>Ecosystem:</strong> GGUF is the universal model format. Every model we evaluated ships in GGUF. No conversion needed.</li>
-    <li><strong>Simplicity:</strong> Compiles to a single <code>.so</code> library. No Python runtime, no Java framework, no TensorFlow dependency.</li>
-    <li><strong>Performance:</strong> Heavily optimized for ARM NEON (Pixel 8's CPU). Memory-mapped model loading avoids copying 2.5GB into RAM.</li>
-    <li><strong>Active development:</strong> Most active open-source LLM inference project. New optimizations weekly.</li>
-    <li><strong>License:</strong> MIT. No restrictions.</li>
-    <li><strong>Proven on Android:</strong> PocketPal AI, Llama on Phone, and other apps already use llama.cpp via NDK.</li>
+    <li><strong>52 t/s on Android GPU</strong> via OpenCL — 3-4x faster than llama.cpp Vulkan</li>
+    <li><strong>Built for mobile GPU sharing</strong> — coexists with UI rendering, unlike desktop-oriented Vulkan backends</li>
+    <li><strong>KV cache, sessions, multi-turn</strong> — all managed by the framework, not by us</li>
+    <li><strong>Supports Gemma, Phi-4, Llama, Qwen</strong> — all our candidate models</li>
+    <li><strong>No GMS required</strong> — runs on GrapheneOS</li>
+    <li><strong>Made by Google for Tensor hardware</strong> — optimized for the exact GPU/NPU in Pixel 8</li>
   </ul>
-
-  <h2>Core Principle</h2>
-  <blockquote>CPU is for the user. GPU/TPU is for the LLM. They never compete. The UI must stay at 120fps while the LLM generates in the background on separate hardware.</blockquote>
 
   <h2>Compute Backends on Pixel 8</h2>
 
-  <h3>Vulkan GPU — Primary</h3>
+  <h3>OpenCL GPU — Primary</h3>
   <ul>
-    <li><strong>This is where all LLM inference runs.</strong> Separate hardware from CPU — UI stays smooth.</li>
-    <li>Pixel 8 has Imagination BXE-9-256 GPU with Vulkan 1.3 support.</li>
-    <li>llama.cpp Vulkan backend uses compute shaders for matrix multiplication — the core LLM operation.</li>
-    <li>Full layer offloading: <code>--n-gpu-layers 999</code> pushes ALL transformer layers to GPU. CPU does zero inference work.</li>
-    <li>Imagination GPU has less community testing than Adreno/Mali. <strong>Benchmarking on actual Pixel 8 is the #1 priority before Phase 2.</strong></li>
-    <li>If Vulkan performs well: ~15-25 t/s for 3.8B model with zero CPU impact.</li>
+    <li><strong>All LLM inference runs here.</strong> Separate hardware from CPU — UI stays smooth.</li>
+    <li>Pixel 8: Imagination BXE-9-256 GPU with OpenCL support.</li>
+    <li>LiteRT-LM uses OpenCL compute kernels optimized for transformer operations.</li>
+    <li>52 t/s decode speed benchmarked by Google on Android GPU.</li>
+    <li>Designed to share GPU with Android's rendering pipeline without causing jank.</li>
   </ul>
 
-  <h3>NNAPI → TPU — Secondary Accelerator</h3>
+  <h3>NPU/TPU — Secondary Accelerator</h3>
   <ul>
-    <li>Android's Neural Networks API can delegate supported operations to the Tensor G3 edge TPU.</li>
-    <li>The TPU is purpose-built for ML inference (matmul, conv). Potentially faster than GPU for these ops.</li>
-    <li>llama.cpp has experimental NNAPI support. If supported ops cover enough of the transformer, we can split: GPU handles attention, TPU handles linear layers.</li>
-    <li><strong>Status:</strong> Experimental. Benchmark alongside Vulkan. Could be a significant speedup.</li>
+    <li>LiteRT-LM has built-in NPU support for Tensor G3's edge TPU.</li>
+    <li>Routes supported operations (matmul, linear layers) to dedicated ML hardware.</li>
+    <li>Can work alongside GPU — GPU handles attention, NPU handles linear projections.</li>
+    <li><strong>Status:</strong> Built into LiteRT-LM. Needs benchmarking to measure actual speedup on Pixel 8.</li>
   </ul>
 
-  <h3>CPU (ARM NEON) — Last Resort Only</h3>
+  <h3>CPU — Last Resort Only</h3>
   <ul>
-    <li><strong>NOT used for inference by default.</strong> CPU runs the UI, Android framework, WebView rendering.</li>
-    <li>CPU inference exists in llama.cpp as a fallback if Vulkan and NNAPI both fail.</li>
-    <li>If we ever fall back to CPU: limit to 2 threads (out of 9 cores) and lower priority to avoid UI impact.</li>
-    <li>This is the failure mode, not the plan.</li>
+    <li><strong>NOT used for inference by default.</strong> CPU runs the UI, Android framework, WebView.</li>
+    <li>LiteRT-LM has a CPU backend as fallback if GPU/NPU both fail.</li>
+    <li>If we ever fall back to CPU: this is a bug, not a feature. Log it and investigate.</li>
   </ul>
 
   <h2>Integration Architecture</h2>
@@ -90,32 +84,30 @@
 │ AiService (Java, Android Foreground Service)    │
 │                                                 │
 │  ┌─────────────┐  ┌─────────────────────────┐   │
-│  │ ModelManager │  │ InferenceEngine (JNI)   │   │
-│  │ load/unload  │──│                         │   │
-│  │ memory mgmt  │  │  ┌──────────────────┐   │   │
-│  └─────────────┘  │  │ libllama.so       │   │   │
-│                    │  │ (llama.cpp)       │   │   │
-│  ┌─────────────┐  │  │                   │   │   │
-│  │IntentRouter  │  │  │ ┌──────────────┐ │   │   │
-│  │(Gemma 1B)   │──│  │ │ CPU (NEON)   │ │   │   │
-│  └─────────────┘  │  │ ├──────────────┤ │   │   │
-│                    │  │ │ Vulkan GPU   │ │   │   │
+│  │ ModelManager │  │ InferenceEngine         │   │
+│  │ load/unload  │──│ (LiteRT-LM Java API)   │   │
+│  │ memory mgmt  │  │                         │   │
+│  └─────────────┘  │  ┌──────────────────┐   │   │
+│                    │  │ liblitert_lm.so  │   │   │
+│  ┌─────────────┐  │  │ (C++ core)       │   │   │
+│  │IntentRouter  │  │  │                  │   │   │
+│  │(Gemma 1B)   │──│  │ ┌──────────────┐ │   │   │
+│  └─────────────┘  │  │ │ OpenCL GPU   │ │   │   │
+│                    │  │ │  PRIMARY     │ │   │   │
 │  ┌─────────────┐  │  │ ├──────────────┤ │   │   │
-│  │AppGenerator  │  │  │ │ NNAPI (TPU)  │ │   │   │
-│  │(Phi-4 Mini) │──│  │ └──────────────┘ │   │   │
-│  └─────────────┘  │  └──────────────────┘   │   │
-│                    └─────────────────────────┘   │
+│  │AppGenerator  │  │  │ │ NPU/TPU     │ │   │   │
+│  │(Phi-4 Mini) │──│  │ │  SECONDARY   │ │   │   │
+│  └─────────────┘  │  │ ├──────────────┤ │   │   │
+│                    │  │ │ CPU (NEON)   │ │   │   │
+│  ┌─────────────┐  │  │ │  LAST RESORT │ │   │   │
+│  │RequestQueue  │  │  │ └──────────────┘ │   │   │
+│  │priority sched│  │  └──────────────────┘   │   │
+│  └─────────────┘  └─────────────────────────┘   │
 └──────────────────────┬──────────────────────────┘
-                       │ JNI calls
-            ┌──────────┴──────────┐
-            │ Native Layer (C/C++) │
-            │ libllama.so          │
-            │ libggml.so           │
-            └──────────┬──────────┘
                        │
           ┌────────────┼────────────┐
           │            │            │
-    Vulkan GPU    NNAPI/TPU    CPU (NEON)
+    OpenCL GPU      NPU/TPU       CPU
      PRIMARY       SECONDARY    LAST RESORT
           │            │            │
     Imagination   Tensor G3     ARM cores
@@ -123,72 +115,56 @@
 
   <h2>Memory Management</h2>
   <ul>
-    <li><strong>mmap loading:</strong> Model files are memory-mapped, not read into RAM. The OS pages in only what's needed. This means a 2.5GB model doesn't use 2.5GB of physical RAM immediately.</li>
-    <li><strong>KV cache:</strong> The key-value cache for context grows during generation. For 2K token context on a 3.8B model: ~200MB additional RAM.</li>
-    <li><strong>Hot-swap:</strong> When switching from Phi-4 Mini back to Gemma 1B, we <code>munmap()</code> the large model and mmap the small one. Target: under 2 seconds.</li>
-    <li><strong>OOM protection:</strong> Android's low-memory killer will target our model before killing user apps. AiService monitors memory pressure and proactively unloads if RAM drops below 500MB free.</li>
+    <li><strong>LiteRT-LM handles model loading</strong> — optimized for mobile memory constraints.</li>
+    <li><strong>KV cache:</strong> Managed by LiteRT-LM. Session state persisted across turns. Compressed under memory pressure.</li>
+    <li><strong>Model switching:</strong> LiteRT-LM supports loading/unloading models. Switch from Phi-4 Mini back to Gemma 1B for intent routing.</li>
+    <li><strong>OOM protection:</strong> AiService monitors memory pressure and proactively unloads the generation model if RAM drops below threshold.</li>
   </ul>
 
-  <h2>Building llama.cpp for Android</h2>
-  <pre><code># Cross-compile llama.cpp for Android ARM64 with Vulkan
-git clone https://github.com/ggml-org/llama.cpp
-cd llama.cpp
+  <h2>LiteRT-LM Integration Code</h2>
+  <pre><code>// InferenceEngine.java — LiteRT-LM wrapper
+import com.google.ai.edge.litert.lm.LlmInference;
+import com.google.ai.edge.litert.lm.LlmInference.LlmInferenceOptions;
 
-# Using Android NDK
-cmake -B build-android \
-  -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
-  -DANDROID_ABI=arm64-v8a \
-  -DANDROID_PLATFORM=android-33 \
-  -DGGML_VULKAN=ON \
-  -DGGML_NATIVE=OFF \
-  -DBUILD_SHARED_LIBS=ON
-
-cmake --build build-android --config Release
-
-# Output: build-android/src/libllama.so + build-android/ggml/src/libggml.so
-# Copy to: system/lib64/ in AOSP overlay</code></pre>
-
-  <h2>JNI Bridge (Java ↔ C++)</h2>
-  <pre><code>// InferenceEngine.java — JNI wrapper for llama.cpp
 public class InferenceEngine {
-    static { System.loadLibrary("llama"); }
+    private LlmInference inference;
 
-    // Native methods — implemented in C++
-    private native long nativeInit(String modelPath, int nThreads, boolean useVulkan);
-    private native String nativeComplete(long ctx, String prompt, int maxTokens);
-    private native int nativeTokenCount(long ctx, String text);
-    private native void nativeAbort(long ctx);
-    private native void nativeFree(long ctx);
-
-    private long ctx = 0;
-
-    public void load(String modelPath, boolean useGpu) {
-        ctx = nativeInit(modelPath, 4, useGpu);  // 4 threads
+    public void load(String modelDir, boolean useGpu) {
+        LlmInferenceOptions options = LlmInferenceOptions.builder()
+            .setModelPath(modelDir)
+            .setMaxTokens(4096)
+            .setPreferredBackend(useGpu
+                ? LlmInferenceOptions.Backend.GPU   // OpenCL
+                : LlmInferenceOptions.Backend.CPU)  // fallback only
+            .build();
+        inference = LlmInference.createFromOptions(options);
     }
 
-    public String complete(String prompt, int maxTokens) {
-        if (ctx == 0) throw new IllegalStateException("Model not loaded");
-        return nativeComplete(ctx, prompt, maxTokens);
+    public String generate(String prompt, int maxTokens) {
+        return inference.generateResponse(prompt);
+    }
+
+    public void generateStreaming(String prompt, Consumer&lt;String&gt; onToken) {
+        inference.generateResponseAsync(prompt, onToken::accept);
     }
 
     public void unload() {
-        if (ctx != 0) { nativeFree(ctx); ctx = 0; }
+        if (inference != null) { inference.close(); inference = null; }
     }
 }</code></pre>
 
   <h2>Sources</h2>
   <ul>
-    <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener">llama.cpp — GitHub</a></li>
-    <li><a href="https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md" target="_blank" rel="noopener">llama.cpp Build Documentation</a></li>
-    <li><a href="https://github.com/ggml-org/llama.cpp/discussions/9464" target="_blank" rel="noopener">llama.cpp Vulkan on Android — Discussion</a></li>
-    <li><a href="https://github.com/ggml-org/llama.cpp/issues/8705" target="_blank" rel="noopener">GPU acceleration on Android — Issue</a></li>
-    <li><a href="https://github.com/a-ghorbani/pocketpal-ai" target="_blank" rel="noopener">PocketPal AI — Reference Android LLM app using llama.cpp</a></li>
-    <li><a href="https://mvpfactory.io/blog/on-device-llm-inference-via-kmp-and-llama-cpp-memory-mapped-model-loading-ane" target="_blank" rel="noopener">On-Device LLM: Memory-Mapped Model Loading</a></li>
+    <li><a href="https://ai.google.dev/edge/litert-lm/overview" target="_blank" rel="noopener">LiteRT-LM Overview</a></li>
+    <li><a href="https://developers.googleblog.com/blazing-fast-on-device-genai-with-litert-lm/" target="_blank" rel="noopener">Blazing Fast On-Device GenAI with LiteRT-LM</a></li>
+    <li><a href="https://ai.google.dev/edge/litert/next/litert_lm_npu" target="_blank" rel="noopener">LiteRT-LM NPU Acceleration</a></li>
+    <li><a href="https://github.com/google-ai-edge/ai-edge-apis" target="_blank" rel="noopener">Google AI Edge APIs — GitHub</a></li>
+    <li><a href="https://arxiv.org/html/2403.11805v1" target="_blank" rel="noopener">LLM as a System Service on Mobile Devices</a></li>
   </ul>
 
   <div class="page-nav">
     <a href="llm-models.html">&larr; Model Comparison</a>
-    <a href="local-llm.html">Local LLM Architecture &rarr;</a>
+    <a href="llm-framework.html">Framework Decision &rarr;</a>
   </div>
 
 </div></div>
