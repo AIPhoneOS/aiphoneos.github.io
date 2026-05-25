@@ -90,17 +90,17 @@
     </div>
   </div>
 
-  <h2>Inference Runtime: llama.cpp</h2>
-  <p>llama.cpp is the clear choice for our on-device inference engine:</p>
+  <h2>Inference Runtime: LiteRT-LM</h2>
+  <p>LiteRT-LM is Google's production-ready on-device LLM framework, open source since March 2026. It replaces our earlier llama.cpp plan after research showed 3-4x better performance. See <a href="llm-framework.html">Framework Decision</a> for the full comparison.</p>
   <ul>
-    <li><strong>Pure C/C++</strong> — no Python, no framework overhead. Compiles to a single binary.</li>
-    <li><strong>GGUF model format</strong> — the standard quantized format. Every model above ships in GGUF.</li>
-    <li><strong>Vulkan GPU backend</strong> — runs inference on GPU via compute shaders. CPU stays free for UI.</li>
-    <li><strong>NNAPI delegation</strong> — can route specific ops to Tensor G3 TPU for additional acceleration.</li>
-    <li><strong>Full GPU layer offloading</strong> — all transformer layers can be pushed to GPU with <code>--n-gpu-layers 999</code>.</li>
-    <li><strong>Memory-mapped model loading</strong> — model file is mmap'd, not copied into RAM. OS manages paging.</li>
-    <li><strong>CPU fallback</strong> — ARM NEON backend exists as last resort if GPU fails. Not the plan.</li>
-    <li><strong>MIT license</strong> — no licensing issues.</li>
+    <li><strong>52 tokens/sec on Android GPU</strong> — via OpenCL, proven on Pixel hardware. llama.cpp Vulkan was ~15-25 t/s.</li>
+    <li><strong>C++ core with Java API</strong> — same integration pattern, no Python, no heavy dependencies.</li>
+    <li><strong>OpenCL GPU backend</strong> — designed to coexist with Android UI rendering. CPU stays free.</li>
+    <li><strong>Built-in NPU support</strong> — routes supported ops to Tensor G3 TPU automatically.</li>
+    <li><strong>KV cache management</strong> — session state, multi-turn conversation, prompt caching all handled.</li>
+    <li><strong>Supports our models</strong> — Gemma, Phi-4, Llama, Qwen all supported natively.</li>
+    <li><strong>No GMS required</strong> — runs standalone on GrapheneOS.</li>
+    <li><strong>Apache 2.0 license</strong> — no restrictions.</li>
   </ul>
 
   <h3>Expected Performance on Pixel 8</h3>
@@ -165,7 +165,7 @@
     ├── init(ggufPath, params)        // load model
     ├── complete(prompt, maxTokens)   // generate text
     ├── tokenize(text)                // count tokens
-    ├── setBackend(vulkan|nnapi|cpu)  // GPU first, TPU second, CPU last resort
+    ├── setBackend(opencl|npu|cpu)    // GPU first, NPU second, CPU last resort
     └── abort()                       // cancel generation</code></pre>
   </div>
 
@@ -191,15 +191,14 @@
     <tr><td>In-app AI queries (<code>aiphone.ai.ask()</code>)</td><td>Gemma 1B for simple queries, Claude for complex. User-configurable.</td></tr>
   </table>
 
-  <h2>How llama.cpp Integrates Into the OS</h2>
-  <p>llama.cpp compiles to a shared library (<code>libllama.so</code>) that lives in the system partition:</p>
-  <pre><code>/system/lib64/libllama.so          — llama.cpp inference engine
-/system/lib64/libggml.so           — GGML tensor library
+  <h2>How LiteRT-LM Integrates Into the OS</h2>
+  <p>LiteRT-LM runs as a native library within our AiService:</p>
+  <pre><code>/system/lib64/liblitert_lm.so       — LiteRT-LM inference engine
 /data/local/aiphone/models/
-  ├── gemma-3-1b-q4_k_m.gguf      — intent router (720MB)
-  └── phi-4-mini-q4_k_m.gguf      — app generator (2.5GB)
+  ├── gemma-3-1b/                   — intent router (720MB)
+  └── phi-4-mini/                   — app generator (2.5GB)
 
-AiService (Java) → JNI → libllama.so → CPU/Vulkan/NNAPI → hardware</code></pre>
+AiService (Java) → LiteRT-LM Java API → liblitert_lm.so → GPU (OpenCL) / NPU</code></pre>
 
   <h2>Battery Impact</h2>
   <ul>
@@ -220,11 +219,12 @@ AiService (Java) → JNI → libllama.so → CPU/Vulkan/NNAPI → hardware</code
 
   <h2>Open Questions</h2>
   <ul>
-    <li><strong>Vulkan performance on Imagination GPU:</strong> needs real-world benchmarking on Pixel 8. May be slower than CPU.</li>
-    <li><strong>NNAPI + TPU delegation:</strong> can llama.cpp delegate specific ops to the Tensor G3 TPU? Experimental, needs testing.</li>
-    <li><strong>Model quality for code generation:</strong> can Phi-4 Mini at 4-bit quantization generate correct, functional HTML/CSS/JS consistently? Needs systematic testing.</li>
-    <li><strong>Hot-swap latency:</strong> how fast can we unload Phi-4 Mini and reload Gemma 1B? Target: under 2 seconds.</li>
-    <li><strong>WebGPU inference in Vanadium:</strong> could we run inference inside the browser runtime via WebGPU instead of a system service? Worth exploring in Phase 4+.</li>
+    <li><strong>LiteRT-LM on GrapheneOS:</strong> does it run without GMS? Google says yes but needs verification on our build.</li>
+    <li><strong>OpenCL on Imagination GPU:</strong> Google's 52 t/s benchmark — was it on Tensor G3 specifically? Need to confirm on Pixel 8.</li>
+    <li><strong>NPU delegation:</strong> which transformer ops can LiteRT-LM route to Tensor G3 TPU? How much speedup?</li>
+    <li><strong>Model quality for code generation:</strong> can Phi-4 Mini generate correct, functional HTML/CSS/JS consistently? Needs systematic testing.</li>
+    <li><strong>Hot-swap latency:</strong> how fast can LiteRT-LM switch between Gemma 1B and Phi-4 Mini? Target: under 2 seconds.</li>
+    <li><strong>GPU sharing:</strong> does LiteRT-LM's OpenCL inference cause frame drops during active UI rendering? Google says it's designed for this but needs real testing.</li>
   </ul>
 
   <h2>Sources</h2>

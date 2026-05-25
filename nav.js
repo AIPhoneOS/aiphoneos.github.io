@@ -34,6 +34,7 @@ const NAV = [
     { title: 'On-Device AI Landscape', href: 'on-device-ai.html' },
     { title: 'Model Comparison', href: 'llm-models.html' },
     { title: 'Inference Runtime', href: 'llm-runtime.html' },
+    { title: 'Framework Decision', href: 'llm-framework.html' },
     { title: 'System Architecture', href: 'local-llm.html' },
   ]},
   { section: 'Security', items: [

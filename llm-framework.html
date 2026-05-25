@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LLM Framework Decision — AIPhone OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.winner-box { background: var(--surface); border: 2px solid var(--green); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.winner-box h3 { color: var(--green); margin-bottom: 8px; }
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.vs-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.vs-card.pick { border-color: var(--green); border-width: 2px; }
+.vs-card h4 { margin-bottom: 6px; }
+.stat-big { font-size: 28px; font-weight: 700; color: var(--green); }
+@media (max-width: 600px) { .vs { grid-template-columns: 1fr; } }
+</style>
+</head><body>
+<button class="menu-btn">&#9776;</button><div class="sidebar-overlay"></div>
+<div class="layout"><nav class="sidebar"></nav><div class="main">
+
+  <h1>LLM Framework Decision</h1>
+  <p class="subtitle">LiteRT-LM vs llama.cpp vs ExecuTorch — which runs our on-device AI?</p>
+
+  <h2>The Discovery</h2>
+  <p>We originally planned to use llama.cpp with Vulkan GPU backend. Then we found <strong>LiteRT-LM</strong> — Google's production-ready LLM inference framework, open source since March 2026. It changes the picture entirely.</p>
+
+  <div class="vs">
+    <div class="vs-card pick">
+      <h4 style="color:var(--green)">LiteRT-LM</h4>
+      <p class="stat-big">52 t/s</p>
+      <p style="font-size:12px;color:var(--text-2)">on Android GPU (OpenCL)</p>
+    </div>
+    <div class="vs-card">
+      <h4>llama.cpp (Vulkan)</h4>
+      <p class="stat-big" style="color:var(--text-2)">~15-25 t/s</p>
+      <p style="font-size:12px;color:var(--text-2)">estimated, untested on Imagination GPU</p>
+    </div>
+  </div>
+
+  <h2>Full Comparison</h2>
+  <table>
+    <tr><th></th><th>LiteRT-LM</th><th>llama.cpp</th><th>ExecuTorch</th><th>MediaPipe LLM</th></tr>
+    <tr><td><strong>From</strong></td><td>Google (open source)</td><td>Community (open source)</td><td>Meta/PyTorch</td><td>Google</td></tr>
+    <tr><td><strong>Language</strong></td><td>C++ core, Java API</td><td>C/C++</td><td>C++</td><td>C++/Java</td></tr>
+    <tr><td><strong>Android GPU</strong></td><td style="color:var(--green)">OpenCL — 52 t/s proven</td><td style="color:var(--yellow)">Vulkan — untested on Pixel 8 GPU</td><td style="color:var(--yellow)">XNNPACK, Vulkan</td><td style="color:var(--green)">GPU delegate</td></tr>
+    <tr><td><strong>NPU/TPU</strong></td><td style="color:var(--green)">Yes — built-in NPU support</td><td style="color:var(--yellow)">NNAPI (experimental)</td><td style="color:var(--green)">NPU, DSP backends</td><td style="color:var(--green)">Via AICore (needs GMS)</td></tr>
+    <tr><td><strong>Model support</strong></td><td>Gemma, Llama, Phi-4, Qwen</td><td>Any GGUF model</td><td>PyTorch exported</td><td>TFLite models</td></tr>
+    <tr><td><strong>KV cache mgmt</strong></td><td style="color:var(--green)">Built-in</td><td style="color:var(--red)">Manual</td><td style="color:var(--yellow)">Basic</td><td style="color:var(--green)">Built-in</td></tr>
+    <tr><td><strong>Session state</strong></td><td style="color:var(--green)">Multi-turn built-in</td><td style="color:var(--red)">Manual</td><td style="color:var(--yellow)">Basic</td><td style="color:var(--green)">Built-in</td></tr>
+    <tr><td><strong>Needs GMS?</strong></td><td style="color:var(--green)">No</td><td style="color:var(--green)">No</td><td style="color:var(--green)">No</td><td style="color:var(--red)">AICore needs GMS</td></tr>
+    <tr><td><strong>Production ready</strong></td><td style="color:var(--green)">Yes (March 2026)</td><td style="color:var(--green)">Yes</td><td style="color:var(--yellow)">Maturing</td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td><strong>License</strong></td><td>Apache 2.0</td><td>MIT</td><td>BSD</td><td>Apache 2.0</td></tr>
+  </table>
+
+  <h2>Why LiteRT-LM Wins</h2>
+
+  <h3>1. Speed: 52 tokens/sec on Android GPU</h3>
+  <p>LiteRT-LM uses OpenCL for GPU compute on Android — not Vulkan. OpenCL has better driver support on many mobile GPUs including Imagination (Pixel 8). Google benchmarked 52 t/s decode speed on Android GPU. llama.cpp Vulkan on the same class of hardware is ~15-25 t/s and untested on Imagination GPUs specifically.</p>
+  <p>At 52 t/s, a 2000-token app (~complete HTML/CSS/JS) generates in <strong>~38 seconds</strong>. At 15 t/s (llama.cpp), it would take <strong>~133 seconds</strong>. That's the difference between "fast" and "unusable."</p>
+
+  <h3>2. GPU inference that doesn't kill the UI</h3>
+  <p>LiteRT-LM is designed for mobile. It manages GPU resource sharing with the Android rendering pipeline. llama.cpp's Vulkan backend was built for desktop GPUs where the display compositor isn't competing for the same hardware.</p>
+
+  <h3>3. KV Cache and Session Management — Built In</h3>
+  <p>For multi-turn conversation ("make me a timer" → "now add a lap feature"), the model needs to remember context. LiteRT-LM handles KV cache persistence, session state, and prompt caching automatically. With llama.cpp, we'd build all of this ourselves.</p>
+
+  <h3>4. Supports All Our Models</h3>
+  <p>LiteRT-LM supports Gemma, Llama, Phi-4, and Qwen. These are exactly our chosen models (Gemma 1B for routing, Phi-4 Mini for generation). No model conversion needed for the standard ones.</p>
+
+  <h3>5. No GMS Required</h3>
+  <p>Unlike MediaPipe LLM's AICore path (which needs Google Play Services), LiteRT-LM runs standalone. Perfect for our GrapheneOS base with no Google services.</p>
+
+  <h3>6. Google Built It for This Exact Hardware</h3>
+  <p>LiteRT-LM is built by the same company that makes the Tensor G3 chip. The GPU (OpenCL) and NPU optimizations are tested on Pixel hardware. No one knows the Imagination GPU driver quirks better than Google.</p>
+
+  <h2>The LLMaaS Architecture Pattern</h2>
+  <p>Academic research (<a href="https://arxiv.org/html/2403.11805v1" target="_blank" rel="noopener">LLM as a System Service on Mobile Devices</a>) formalizes exactly what we're building:</p>
+
+  <h3>Key Concepts</h3>
+  <ul>
+    <li><strong>Single model instance:</strong> One copy of LLM weights in memory, shared across all apps. Not one model per app.</li>
+    <li><strong>OS-level request queue:</strong> All inference requests (from home screen, from generated apps via <code>aiphone.ai.ask()</code>, from intent routing) go through one queue. The OS prioritizes and schedules.</li>
+    <li><strong>KV cache sharing:</strong> If two apps ask similar questions, the KV cache from the first can partially serve the second. Saves compute and energy.</li>
+    <li><strong>Per-app KV cache isolation:</strong> Each app's conversation context is isolated for privacy, but the model weights are shared.</li>
+    <li><strong>Energy-aware batching:</strong> If multiple requests arrive within a short window, batch them for GPU efficiency rather than running sequentially.</li>
+    <li><strong>Memory pressure handling:</strong> When RAM is low, compress KV cache (quantize to lower precision) rather than evicting it entirely. Faster to decompress than to recompute.</li>
+  </ul>
+
+  <h3>How It Maps to Our AiService</h3>
+  <pre><code>AiService (Android Foreground Service)
+│
+├── RequestQueue
+│   ├── enqueue(appId, prompt, priority, callback)
+│   ├── prioritize()     // intent routing > app generation > in-app queries
+│   ├── batch()          // group nearby requests for GPU efficiency
+│   └── cancel(appId)    // user closed the app, cancel pending
+│
+├── ModelManager
+│   ├── loadRouter()     // Gemma 1B — stays loaded
+│   ├── loadGenerator()  // Phi-4 Mini — on demand
+│   ├── unloadGenerator()
+│   └── getMemoryPressure()
+│
+├── SessionManager
+│   ├── getSession(appId)      // per-app conversation context
+│   ├── persistKVCache(appId)  // save context to disk
+│   ├── restoreKVCache(appId)  // reload context
+│   └── compressKVCache()      // reduce memory under pressure
+│
+├── InferenceEngine (LiteRT-LM wrapper)
+│   ├── init(modelPath, backend)  // GPU (OpenCL) primary
+│   ├── generate(session, prompt, maxTokens, callback)
+│   ├── classify(text, categories)
+│   └── abort()
+│
+└── MonitorService
+    ├── getGpuUtilization()
+    ├── getThermalState()
+    ├── getQueueDepth()
+    └── getTokensPerSecond()</code></pre>
+
+  <h2>Request Priority Scheme</h2>
+  <table>
+    <tr><th>Priority</th><th>Source</th><th>Example</th><th>Latency target</th></tr>
+    <tr><td style="color:var(--red)"><strong>P0 Critical</strong></td><td>Intent routing</td><td>User typed something, classify intent</td><td>&lt; 300ms</td></tr>
+    <tr><td style="color:var(--yellow)"><strong>P1 High</strong></td><td>App generation</td><td>"Make me a timer"</td><td>&lt; 40 sec</td></tr>
+    <tr><td style="color:var(--accent)"><strong>P2 Normal</strong></td><td>In-app AI query</td><td><code>aiphone.ai.ask("summarize this")</code></td><td>&lt; 5 sec</td></tr>
+    <tr><td style="color:var(--text-2)"><strong>P3 Low</strong></td><td>Background tasks</td><td>Pre-generating suggested apps, embeddings</td><td>Best effort</td></tr>
+  </table>
+  <p>P0 requests preempt everything. If the user types while an app is generating, intent routing runs immediately and generation pauses momentarily.</p>
+
+  <h2>Thermal Management</h2>
+  <ul>
+    <li><strong>Monitor:</strong> AiService watches <code>ThermalManager</code> for device temperature.</li>
+    <li><strong>Throttle:</strong> At thermal level MODERATE, reduce generation speed (lower batch size).</li>
+    <li><strong>Pause:</strong> At thermal level SEVERE, pause local generation entirely. Queue requests for cloud fallback.</li>
+    <li><strong>Resume:</strong> When temperature drops, resume local generation from where it paused.</li>
+  </ul>
+
+  <h2>Revised Decision</h2>
+  <div class="winner-box">
+    <h3>LiteRT-LM replaces llama.cpp as inference engine</h3>
+    <ul>
+      <li><strong>Runtime:</strong> LiteRT-LM (C++ core, Java API, Apache 2.0)</li>
+      <li><strong>GPU backend:</strong> OpenCL — 52 t/s proven on Android, designed to coexist with UI rendering</li>
+      <li><strong>NPU backend:</strong> Built-in NPU support for Tensor G3 TPU</li>
+      <li><strong>Models:</strong> Gemma 1B (router) + Phi-4 Mini (generator) — both supported natively</li>
+      <li><strong>Architecture:</strong> LLMaaS pattern — single model instance, OS-level request queue, per-app KV cache</li>
+      <li><strong>CPU:</strong> Reserved for UI only. Never used for inference.</li>
+    </ul>
+  </div>
+
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://ai.google.dev/edge/litert-lm/overview" target="_blank" rel="noopener">LiteRT-LM Overview — Google AI Edge</a></li>
+    <li><a href="https://developers.googleblog.com/blazing-fast-on-device-genai-with-litert-lm/" target="_blank" rel="noopener">Blazing Fast On-Device GenAI with LiteRT-LM</a></li>
+    <li><a href="https://ai.google.dev/edge/litert/next/litert_lm_npu" target="_blank" rel="noopener">LiteRT-LM NPU Acceleration</a></li>
+    <li><a href="https://arxiv.org/html/2403.11805v1" target="_blank" rel="noopener">LLM as a System Service on Mobile Devices (paper)</a></li>
+    <li><a href="https://github.com/google-ai-edge/ai-edge-apis" target="_blank" rel="noopener">Google AI Edge APIs — GitHub</a></li>
+    <li><a href="https://executorch.ai/" target="_blank" rel="noopener">ExecuTorch — PyTorch on-device</a></li>
+  </ul>
+
+  <div class="page-nav">
+    <a href="llm-runtime.html">&larr; Inference Runtime</a>
+    <a href="local-llm.html">System Architecture &rarr;</a>
+  </div>
+
+</div></div>
+<script src="nav.js"></script>
+</body></html>
